@@ -1,0 +1,18 @@
+# GitHub Pages 리다이렉트 설정
+/ /index.html 200
+
+# API 경로는 404로 처리
+/api/* /404.html 404
+
+# 관리자 페이지들
+/admin-avatars.html /admin-avatars.html 200
+/admin-login.html /admin-login.html 200
+/admin.html /admin.html 200
+
+# 기타 페이지들
+/dashboard.html /dashboard.html 200
+/exam.html /exam.html 200
+/login.html /login.html 200
+/profile.html /profile.html 200
+/register.html /register.html 200
+/results.html /results.html 200

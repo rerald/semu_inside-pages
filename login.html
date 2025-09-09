@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://skpvtqohyspfsmvwrgoc.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';">
+    <title>로그인 - Quizbank</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/common.css">
+    <style>
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 40px;
+            text-align: center;
+            min-height: 600px;
+        }
+
+        .logo {
+            font-size: 3rem;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        .title {
+            font-size: 2rem;
+            color: var(--dark-gray);
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .subtitle {
+            color: var(--medium-gray);
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+
+        .login-form {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .form-group input {
+            padding: 16px;
+            font-size: 16px;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .test-accounts {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            font-size: 14px;
+            color: var(--medium-gray);
+        }
+
+        .test-accounts h4 {
+            margin-bottom: 10px;
+            color: var(--dark-gray);
+        }
+
+        .test-account {
+            background: white;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 6px;
+            font-family: monospace;
+            border: 1px solid #e9ecef;
+        }
+
+        .quick-login {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .quick-login button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.3s;
+        }
+
+        .quick-login button:hover {
+            background: var(--primary-dark);
+        }
+
+        .alternative-login {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .alternative-login h4 {
+            margin: 0 0 15px 0;
+            color: var(--dark-gray);
+            font-size: 1rem;
+        }
+
+        .btn-magic {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin: 5px;
+            transition: all 0.3s;
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-magic:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-magic i {
+            margin-right: 8px;
+        }
+
+        .auth-links {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .auth-links p {
+            color: var(--medium-gray);
+            margin: 0;
+        }
+
+        .register-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .register-link:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        .admin-link {
+            color: #ff6b6b;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .admin-link:hover {
+            color: #ee5a24;
+            text-decoration: underline;
+        }
+
+        .admin-quick-login {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #ffeaa7 0%, #fab1a0 100%);
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid #fdcb6e;
+        }
+
+        .admin-quick-login h4 {
+            margin: 0 0 15px 0;
+            color: #e17055;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .btn-admin-login {
+            background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(209, 48, 49, 0.3);
+        }
+
+        .btn-admin-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(209, 48, 49, 0.4);
+            background: linear-gradient(135deg, #d63031 0%, #74b9ff 100%);
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 40px 20px;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .title {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="container">
+            <div class="login-container">
+                <div class="logo">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h1 class="title">Quizbank</h1>
+                <p class="subtitle">사내 시험 플랫폼</p>
+                
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="email">이메일</label>
+                        <input type="email" id="email" name="email" class="form-control" required 
+                               placeholder="이메일을 입력하세요">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">비밀번호</label>
+                        <input type="password" id="password" name="password" class="form-control" required 
+                               placeholder="비밀번호를 입력하세요">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-large login-btn">
+                        <i class="fas fa-sign-in-alt"></i> 로그인
+                    </button>
+                </form>
+                
+                <div class="auth-links">
+                    <p>계정이 없으신가요? <a href="./register.html" class="register-link">회원가입</a></p>
+                    <p>관리자이신가요? <a href="./admin-login.html" class="admin-link">
+                        <i class="fas fa-shield-alt"></i> 관리자 로그인
+                    </a></p>
+                </div>
+                
+
+                
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
+    
+    <!-- 공통 스크립트 -->
+    <script src="./assets/js/common.js"></script>
+    
+    <script>
+        // 로그인 페이지 전용 스크립트
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('📋 로그인 페이지 로드됨');
+            
+            // 로그인 페이지 로드 완료
+            console.log('로그인 페이지가 로드되었습니다.');
+            
+            // 로그인 폼 이벤트
+            const loginForm = document.getElementById('loginForm');
+            loginForm.addEventListener('submit', handleLogin);
+            
+            // 자동 리다이렉트 제거 - 사용자가 명시적으로 로그인할 때만 이동
+            console.log('📋 로그인 페이지 - 자동 리다이렉트 비활성화됨');
+            
+            // 기존 세션이 있어도 사용자가 직접 로그인 버튼을 누를 때까지 대기
+            // 이렇게 하면 비밀번호 입력 시 갑작스러운 리다이렉트를 방지할 수 있습니다.
+        });
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!email || !password) {
+                if (window.showAlert) {
+                    showAlert('이메일과 비밀번호를 입력해주세요.', 'error');
+                } else {
+                    alert('이메일과 비밀번호를 입력해주세요.');
+                }
+                return;
+            }
+            
+            // 로딩 상태
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 로그인 중...';
+            submitBtn.disabled = true;
+            
+            try {
+                if (!window.semuApp || !window.semuApp.login) {
+                    throw new Error('로그인 시스템이 초기화되지 않았습니다. 페이지를 새로고침해주세요.');
+                }
+                
+                const result = await window.semuApp.login(email, password);
+                
+                if (result.success) {
+                    if (window.showAlert) {
+                        showAlert('로그인 성공!', 'success');
+                    } else {
+                        alert('로그인 성공!');
+                    }
+                    
+                    // 대시보드로 이동
+                    setTimeout(() => {
+                        window.location.href = './dashboard.html';
+                    }, 1000);
+                } else {
+                    if (window.showAlert) {
+                        showAlert(result.error, 'error');
+                    } else {
+                        alert(result.error);
+                    }
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                if (window.showAlert) {
+                    showAlert('로그인 중 오류가 발생했습니다.', 'error');
+                } else {
+                    alert('로그인 중 오류가 발생했습니다.');
+                }
+            } finally {
+                // 로딩 상태 해제
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+
+    </script>
+</body>
+</html>

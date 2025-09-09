@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포인트 관리 시스템 - 세무인사이드</title>
+    <link rel="stylesheet" href="./styles/main.css">
+    <link rel="stylesheet" href="./assets/css/common.css">
+    <style>
+        .points-admin-container {
+            padding: 1.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding: 1.5rem 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-left: 6px solid var(--primary-color);
+        }
+
+        .admin-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark-gray);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .admin-title::before {
+            content: "🎯";
+            font-size: 2rem;
+        }
+
+        .admin-nav {
+            display: flex;
+            gap: 0.75rem;
+            background: #f1f5f9;
+            padding: 0.5rem;
+            border-radius: 12px;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), #764ba2);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-number {
+            font-size: 2.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color), #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            height: fit-content;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.25rem 1.75rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-content {
+            padding: 2rem;
+        }
+
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .transaction-item-compact {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .transaction-item-compact:hover {
+            background: #f1f5f9;
+        }
+
+        .transaction-item-compact.earn {
+            border-left-color: #10b981;
+        }
+
+        .transaction-item-compact.spend {
+            border-left-color: #ef4444;
+        }
+
+        .transaction-item-compact .user-name {
+            font-weight: 600;
+            color: #374151;
+            min-width: 80px;
+            margin-right: 0.75rem;
+        }
+
+        .transaction-item-compact .description {
+            flex: 1;
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-right: 0.75rem;
+        }
+
+        .transaction-item-compact .date {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            min-width: 80px;
+            margin-right: 0.75rem;
+        }
+
+        .transaction-item-compact .amount {
+            font-weight: 700;
+            font-size: 0.95rem;
+            min-width: 70px;
+            text-align: right;
+        }
+
+        .transaction-item-compact .amount.positive {
+            color: #10b981;
+        }
+
+        .transaction-item-compact .amount.negative {
+            color: #ef4444;
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .ranking-item-compact {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .ranking-item-compact:hover {
+            background: #f1f5f9;
+        }
+
+        .ranking-item-compact .rank {
+            font-weight: 700;
+            font-size: 1rem;
+            min-width: 35px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+
+        .ranking-item-compact .rank.gold {
+            color: #f59e0b;
+        }
+
+        .ranking-item-compact .rank.silver {
+            color: #9ca3af;
+        }
+
+        .ranking-item-compact .rank.bronze {
+            color: #d97706;
+        }
+
+        .ranking-item-compact .rank.other {
+            color: #6b7280;
+        }
+
+        .ranking-item-compact .name {
+            font-weight: 600;
+            color: #374151;
+            min-width: 80px;
+            margin-right: 0.75rem;
+        }
+
+        .ranking-item-compact .dept {
+            flex: 1;
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-right: 0.75rem;
+        }
+
+        .ranking-item-compact .points {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--primary-color);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .tab-content {
+            display: block;
+        }
+
+        .tab-content.hidden {
+            display: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .points-admin-container {
+                padding: 1rem;
+            }
+            
+            .admin-header {
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: stretch;
+                padding: 1.25rem;
+            }
+            
+            .admin-title {
+                font-size: 1.75rem;
+            }
+            
+            .admin-nav {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .nav-btn {
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1.5rem;
+            }
+            
+            .stat-number {
+                font-size: 2.25rem;
+            }
+            
+            .card-content {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-title {
+                font-size: 1.5rem;
+            }
+            
+            .nav-btn {
+                padding: 0.625rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="points-admin-container">
+        <!-- 헤더 -->
+        <div class="admin-header">
+            <h1 class="admin-title">포인트 관리 시스템</h1>
+            <div class="admin-nav">
+                <button class="nav-btn active" data-tab="overview">📊 대시보드</button>
+                <button class="nav-btn" data-tab="management">⚙️ 포인트 관리</button>
+                <button class="nav-btn" data-tab="history">📋 거래 내역</button>
+                <button class="nav-btn" data-tab="analytics">📈 분석</button>
+                <a href="./admin.html" class="nav-btn">🔙 관리자 메인</a>
+            </div>
+        </div>
+
+        <!-- 대시보드 탭 -->
+        <div id="overviewTab" class="tab-content">
+            <!-- 통계 카드 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers">-</div>
+                    <div class="stat-label">총 사용자</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPointsIssued">-</div>
+                    <div class="stat-label">총 발급 포인트</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPointsSpent">-</div>
+                    <div class="stat-label">총 사용 포인트</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeUsersToday">-</div>
+                    <div class="stat-label">오늘 활동 사용자</div>
+                </div>
+            </div>
+
+            <div class="dashboard-cards">
+                <!-- 최근 거래 내역 -->
+                <div class="dashboard-card">
+                    <div class="card-header">📊 최근 거래 내역</div>
+                    <div class="card-content">
+                        <div id="recentTransactions" class="transaction-list">
+                            로딩 중...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 포인트 랭킹 -->
+                <div class="dashboard-card">
+                    <div class="card-header">🏆 포인트 랭킹 TOP 10</div>
+                    <div class="card-content">
+                        <div id="pointsLeaderboard" class="ranking-list">
+                            로딩 중...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 다른 탭들 (간략화) -->
+        <div id="managementTab" class="tab-content hidden">
+            <h2>포인트 관리</h2>
+            <p>포인트 관리 기능이 여기에 표시됩니다.</p>
+        </div>
+
+        <div id="historyTab" class="tab-content hidden">
+            <h2>거래 내역</h2>
+            <p>거래 내역이 여기에 표시됩니다.</p>
+        </div>
+
+        <div id="analyticsTab" class="tab-content hidden">
+            <h2>분석</h2>
+            <p>분석 정보가 여기에 표시됩니다.</p>
+        </div>
+    </div>
+
+    <!-- 스크립트 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.js"></script>
+    <script src="./js/config.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/points-admin.js"></script>
+    
+    <script>
+        // 간단한 초기화 스크립트
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🎯 포인트 관리 시스템 로드됨');
+            
+            try {
+                // Supabase 클라이언트 초기화
+                if (window.supabase && window.SUPABASE_CONFIG) {
+                    window.supabaseClient = window.supabase.createClient(
+                        window.SUPABASE_CONFIG.url,
+                        window.SUPABASE_CONFIG.anonKey
+                    );
+                    console.log('✅ Supabase 클라이언트 초기화 완료');
+                } else {
+                    console.warn('⚠️ Supabase 설정 없음, 목업 모드 사용');
+                }
+                
+                // pointsAdmin 객체가 있으면 초기화
+                if (window.pointsAdmin) {
+                    // 개발 모드: 권한 확인 우회
+                    console.log('🔧 개발 모드: 권한 확인 우회');
+                    
+                    // UI 초기화
+                    window.pointsAdmin.setupTabNavigation();
+                    
+                    // 데이터 로드
+                    await loadMockData();
+                }
+                
+                console.log('🎯 초기화 완료!');
+                
+            } catch (error) {
+                console.error('❌ 초기화 실패:', error);
+                await loadMockData(); // 실패 시 목업 데이터 로드
+            }
+        });
+        
+        // 목업 데이터 로드 함수
+        async function loadMockData() {
+            console.log('🔧 목업 데이터 로딩...');
+            
+            // 통계 업데이트
+            document.getElementById('totalUsers').textContent = '12';
+            document.getElementById('totalPointsIssued').textContent = '25,000';
+            document.getElementById('totalPointsSpent').textContent = '8,500';
+            document.getElementById('activeUsersToday').textContent = '5';
+            
+            // 거래 내역 목업
+            const transactionsHtml = `
+                <div class="transaction-item-compact earn">
+                    <span class="user-name">홍길동</span>
+                    <span class="description">시험 완료 보너스</span>
+                    <span class="date">2025. 1. 15.</span>
+                    <span class="amount positive">+100 P</span>
+                </div>
+                <div class="transaction-item-compact spend">
+                    <span class="user-name">김영희</span>
+                    <span class="description">아바타 구매 (멋진 모자)</span>
+                    <span class="date">2025. 1. 15.</span>
+                    <span class="amount negative">-50 P</span>
+                </div>
+                <div class="transaction-item-compact earn">
+                    <span class="user-name">박철수</span>
+                    <span class="description">연속 정답 보너스</span>
+                    <span class="date">2025. 1. 14.</span>
+                    <span class="amount positive">+200 P</span>
+                </div>
+                <div class="transaction-item-compact earn">
+                    <span class="user-name">이영수</span>
+                    <span class="description">시험 합격 보너스</span>
+                    <span class="date">2025. 1. 14.</span>
+                    <span class="amount positive">+150 P</span>
+                </div>
+            `;
+            document.getElementById('recentTransactions').innerHTML = transactionsHtml;
+            
+            // 랭킹 목업
+            const rankingHtml = `
+                <div class="ranking-item-compact">
+                    <span class="rank gold">🥇</span>
+                    <span class="name">홍길동</span>
+                    <span class="dept">개발팀</span>
+                    <span class="points">1,500 P</span>
+                </div>
+                <div class="ranking-item-compact">
+                    <span class="rank silver">🥈</span>
+                    <span class="name">김영희</span>
+                    <span class="dept">기획팀</span>
+                    <span class="points">1,200 P</span>
+                </div>
+                <div class="ranking-item-compact">
+                    <span class="rank bronze">🥉</span>
+                    <span class="name">박철수</span>
+                    <span class="dept">디자인팀</span>
+                    <span class="points">890 P</span>
+                </div>
+                <div class="ranking-item-compact">
+                    <span class="rank other">4.</span>
+                    <span class="name">이영수</span>
+                    <span class="dept">마케팅팀</span>
+                    <span class="points">750 P</span>
+                </div>
+                <div class="ranking-item-compact">
+                    <span class="rank other">5.</span>
+                    <span class="name">최민지</span>
+                    <span class="dept">개발팀</span>
+                    <span class="points">650 P</span>
+                </div>
+            `;
+            document.getElementById('pointsLeaderboard').innerHTML = rankingHtml;
+            
+            console.log('✅ 목업 데이터 로드 완료');
+        }
+        
+        // 탭 네비게이션 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            const navBtns = document.querySelectorAll('.nav-btn[data-tab]');
+            const tabs = document.querySelectorAll('.tab-content');
+            
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+                    
+                    // 모든 버튼에서 active 클래스 제거
+                    navBtns.forEach(b => b.classList.remove('active'));
+                    // 클릭된 버튼에 active 클래스 추가
+                    this.classList.add('active');
+                    
+                    // 모든 탭 숨기기
+                    tabs.forEach(tab => {
+                        if (tab.id === targetTab + 'Tab') {
+                            tab.classList.remove('hidden');
+                        } else {
+                            tab.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+

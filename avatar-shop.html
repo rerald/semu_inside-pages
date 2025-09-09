@@ -1,0 +1,1381 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아바타 상점 - 세무인사이드</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .shop-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .shop-header {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            min-width: 120px;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-center {
+            text-align: center;
+            flex: 1;
+        }
+
+        .shop-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .shop-subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .user-points {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1rem;
+        }
+
+        .points-badge {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-weight: 600;
+            box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3);
+        }
+
+        .shop-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #666;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #007bff;
+            border-bottom: 3px solid #007bff;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+        }
+
+        .tab-content {
+            padding: 30px;
+            min-height: 500px;
+        }
+
+        .tab-content.hidden {
+            display: none;
+        }
+
+        .items-grid {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+            gap: 25px !important;
+            margin-top: 20px !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+
+        .item-card {
+            background: white !important;
+            border-radius: 15px !important;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+            overflow: hidden !important;
+            transition: all 0.3s ease !important;
+            border: 1px solid #e9ecef !important;
+            position: relative !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+            min-height: 350px !important;
+        }
+
+        /* 재고 표시 스타일 */
+        .stock-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            z-index: 10;
+            backdrop-filter: blur(4px);
+        }
+
+        .stock-badge.unlimited {
+            background: rgba(40, 167, 69, 0.9);
+        }
+
+        .stock-badge.sufficient {
+            background: rgba(0, 123, 255, 0.9);
+        }
+
+        .stock-badge.low {
+            background: rgba(255, 193, 7, 0.9);
+            color: #000;
+        }
+
+        .stock-badge.critical {
+            background: rgba(220, 53, 69, 0.9);
+        }
+
+        .stock-badge.sold-out {
+            background: rgba(108, 117, 125, 0.9);
+        }
+
+        .item-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .item-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .item-info {
+            padding: 20px;
+        }
+
+        .item-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        .item-description {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .item-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 15px;
+        }
+
+        .item-price.free {
+            color: #28a745;
+        }
+
+        .item-price.expensive {
+            color: #dc3545;
+        }
+
+        .purchase-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .purchase-btn.primary {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+        }
+
+        .purchase-btn.primary:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+        }
+
+        .purchase-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        /* 소유자 정보 스타일 */
+        .owner-info {
+            margin: 4px 0;
+            padding: 6px 8px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            max-height: 120px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            color: #6c757d;
+            line-height: 1.2;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 15% auto;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .modal p {
+            margin-bottom: 30px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn.primary {
+            background: #007bff;
+            color: white;
+        }
+
+        .modal-btn.secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .modal-btn:hover {
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .items-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .back-button {
+                align-self: flex-start;
+                min-width: 100px;
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .shop-title {
+                font-size: 2rem;
+            }
+            
+            .shop-subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="shop-container">
+        <!-- 헤더 -->
+        <div class="shop-header">
+            <div class="header-content">
+                <button class="back-button" onclick="goToDashboard()" title="대시보드로 돌아가기">
+                    ← 대시보드
+                </button>
+                <div class="header-center">
+                    <h1 class="shop-title">🎭 아바타 상점</h1>
+                    <p class="shop-subtitle">멋진 아바타로 나만의 개성을 표현해보세요!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 사용자 정보 -->
+        <div class="user-info">
+            <div>
+                <h3>안녕하세요! 👋</h3>
+                <p>포인트를 사용해서 멋진 아바타를 구매해보세요.</p>
+            </div>
+            <div class="user-points">
+                <span>💰 보유 포인트:</span>
+                <span class="points-badge" id="user-points">0P</span>
+            </div>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="shop-tabs">
+            <button class="tab-button active" onclick="switchTab('shop')">
+                🛒 상점
+            </button>
+            <button class="tab-button" onclick="switchTab('inventory')">
+                👤 내 아바타
+            </button>
+        </div>
+
+        <!-- 상점 탭 -->
+        <div id="shop-tab" class="tab-content">
+            <div id="shop-loading" class="loading">
+                아바타 상품을 불러오는 중입니다...
+            </div>
+            <div id="shop-items" class="items-grid">
+                <!-- 아바타 아이템들이 여기에 동적으로 로드됩니다 -->
+            </div>
+        </div>
+
+        <!-- 인벤토리 탭 -->
+        <div id="inventory-tab" class="tab-content hidden">
+            <div id="inventory-loading" class="loading">
+                내 아바타를 불러오는 중입니다...
+            </div>
+            <div id="inventory-items" class="items-grid">
+                <!-- 사용자가 보유한 아바타들이 여기에 표시됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 구매 확인 모달 -->
+    <div id="purchaseModal" class="modal">
+        <div class="modal-content">
+            <h2>🛒 구매 확인</h2>
+            <p id="purchase-message">정말로 이 아바타를 구매하시겠습니까?</p>
+            <div class="modal-option">
+                <label style="display: flex; align-items: center; gap: 8px; margin: 15px 0; font-size: 0.9rem;">
+                    <input type="checkbox" id="auto-equip-checkbox" checked style="margin: 0;">
+                    구매 후 바로 착용하기
+                </label>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="confirmPurchase()">구매하기</button>
+                <button class="modal-btn secondary" onclick="closePurchaseModal()">취소</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/common.js"></script>
+    <script>
+        // 아바타 상점 클래스
+        class AvatarShop {
+            constructor() {
+                this.avatarItems = [];
+                this.userAvatars = [];
+                this.userPoints = 0;
+                this.currentUser = null;
+                this.selectedItemId = null;
+                this.avatarOwners = {};
+                
+                this.init();
+            }
+
+            async init() {
+                console.log('🛒 아바타 상점 초기화 시작');
+                
+                try {
+                    // SemuApp 초기화 대기
+                    await this.waitForSemuApp();
+                    
+                    // 사용자 인증 확인
+                    await this.checkAuth();
+                    
+                    // 데이터 로드
+                    await this.loadUserPoints();
+                    await this.loadAvatarItems();
+                    await this.loadUserAvatars();
+                    await this.loadAvatarOwners();
+                    
+                    console.log('✅ 아바타 상점 초기화 완료');
+                    
+                    // 강제 표시 보장
+                    setTimeout(() => {
+                        this.forceDisplayAvatars();
+                    }, 1000);
+                    
+                    // 전역 변수로 등록하여 switchTab에서 접근 가능하게 함
+                    window.avatarShop = this;
+                    
+                } catch (error) {
+                    console.error('❌ 아바타 상점 초기화 실패:', error);
+                    this.showError('아바타 상점을 불러오는 중 오류가 발생했습니다.');
+                }
+            }
+
+            async waitForSemuApp() {
+                console.log('⏳ SemuApp 초기화 대기 중...');
+                
+                let attempts = 0;
+                const maxAttempts = 100;
+                
+                while (attempts < maxAttempts) {
+                    if (window.semuApp && window.semuApp.supabaseClient) {
+                        console.log('✅ SemuApp 초기화 완료 확인');
+                        return;
+                    }
+                    
+                    attempts++;
+                    console.log(`   - SemuApp 존재: ${!!window.semuApp}`);
+                    console.log(`   - supabaseClient 존재: ${!!(window.semuApp && window.semuApp.supabaseClient)}`);
+                    console.log(`   - currentUser 존재: ${!!(window.semuApp && window.semuApp.currentUser)}`);
+                    
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                // 수동 초기화 시도
+                console.log('⚠️ SemuApp 자동 초기화 실패, 수동 초기화 시도');
+                if (window.SemuApp) {
+                    window.semuApp = new window.SemuApp();
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+            }
+
+            async checkAuth() {
+                console.log('🔍 사용자 인증 상태 확인 중...');
+                
+                if (window.semuApp && window.semuApp.currentUser) {
+                    this.currentUser = window.semuApp.currentUser;
+                    console.log('✅ SemuApp에서 사용자 정보 확인:', this.currentUser.email);
+                } else {
+                    console.log('📋 SemuApp.currentUser: null');
+                    console.log('⚠️ SemuApp.currentUser가 없음, Supabase 세션 직접 확인');
+                    
+                    // Supabase 세션 직접 확인
+                    try {
+                        const { data: { session } } = await window.semuApp.supabaseClient.auth.getSession();
+                        if (session && session.user) {
+                            console.log('✅ Supabase 세션에서 사용자 발견:', session.user.email);
+                            
+                            // 프로필 정보 조회
+                            const { data: profile } = await window.semuApp.supabaseClient
+                                .from('profiles')
+                                .select('*')
+                                .eq('id', session.user.id)
+                                .single();
+                            
+                            this.currentUser = {
+                                id: session.user.id,
+                                email: session.user.email,
+                                ...profile
+                            };
+                            
+                            console.log('✅ 사용자 정보 복원 완료:', this.currentUser.email);
+                        } else {
+                            throw new Error('세션이 없습니다');
+                        }
+                    } catch (error) {
+                        console.error('❌ 인증 확인 실패:', error);
+                        alert('로그인이 필요합니다.');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                }
+                
+                console.log('✅ 사용자 인증 확인:', this.currentUser.email);
+            }
+
+            async loadUserPoints() {
+                try {
+                    const { data, error } = await window.semuApp.supabaseClient
+                        .from('user_points')
+                        .select('points')
+                        .eq('user_id', this.currentUser.id)
+                        .single();
+                    
+                    if (error) throw error;
+                    
+                    this.userPoints = data?.points || 0;
+                    console.log('💰 사용자 포인트 로드:', this.userPoints);
+                    
+                    // UI 업데이트
+                    document.getElementById('user-points').textContent = `${this.userPoints}P`;
+                } catch (error) {
+                    console.error('❌ 포인트 로드 실패:', error);
+                    this.userPoints = 0;
+                }
+            }
+
+            async loadAvatarItems() {
+                console.log('🎭 아바타 아이템 로드 중...');
+                
+                try {
+                    const { data, error } = await window.semuApp.supabaseClient
+                        .from('avatar_items')
+                        .select('*')
+                        .eq('is_active', true)
+                        .order('price', { ascending: true });
+                    
+                    if (error) {
+                        console.error('❌ 아바타 아이템 로드 실패:', error);
+                        if (error.code === '42P01') {
+                            console.error('❌ avatar_items 테이블이 존재하지 않습니다.');
+                            this.showError('아바타 시스템이 아직 설정되지 않았습니다.');
+                        } else if (error.code === 'PGRST301') {
+                            console.error('❌ RLS 정책 오류');
+                            this.showError('권한이 없습니다. 관리자에게 문의하세요.');
+                        }
+                        return;
+                    }
+                    
+                    this.avatarItems = data || [];
+                    console.log('✅ 아바타 아이템 로드 완료:', this.avatarItems.length, '개');
+                    
+                    // 상점 아이템 렌더링
+                    this.renderShopItems();
+                } catch (error) {
+                    console.error('❌ 아바타 아이템 로드 중 오류:', error);
+                    this.showError('아바타 아이템을 불러오는 중 오류가 발생했습니다.');
+                }
+            }
+
+            async loadUserAvatars() {
+                console.log('👤 사용자 아바타 로드 중...');
+                
+                try {
+                    const { data, error } = await window.semuApp.supabaseClient
+                        .from('user_avatars')
+                        .select(`
+                            *,
+                            avatar_items (*)
+                        `)
+                        .eq('user_id', this.currentUser.id);
+                    
+                    if (error) throw error;
+                    
+                    this.userAvatars = data || [];
+                    console.log('✅ 사용자 아바타 로드 완료:', this.userAvatars.length, '개');
+                    console.log('📦 사용자 아바타 데이터:', this.userAvatars);
+                    
+                    if (this.userAvatars.length > 0) {
+                        const activeAvatar = this.userAvatars.find(ua => ua.is_active);
+                        if (activeAvatar) {
+                            console.log('🎯 활성 아바타:', activeAvatar.avatar_items.name);
+                        }
+                    }
+                    
+                    // 인벤토리 렌더링 호출
+                    console.log('🎨 인벤토리 렌더링 시작...');
+                    this.renderInventoryItems();
+                    console.log('✅ 인벤토리 렌더링 완료');
+                    
+                } catch (error) {
+                    console.error('❌ 사용자 아바타 로드 실패:', error);
+                    // 오류 발생 시에도 빈 상태 표시
+                    this.renderInventoryItems();
+                }
+            }
+
+            async loadAvatarOwners() {
+                console.log('👥 아바타 소유자 정보 로드 중...');
+                
+                try {
+                    const { data, error } = await window.semuApp.supabaseClient
+                        .from('user_avatars')
+                        .select(`
+                            avatar_item_id,
+                            profiles!user_id (
+                                name
+                            )
+                        `);
+                    
+                    if (error) throw error;
+                    
+                    // 아바타별 소유자 목록 생성
+                    this.avatarOwners = {};
+                    data.forEach(userAvatar => {
+                        const avatarId = userAvatar.avatar_item_id;
+                        const ownerName = userAvatar.profiles?.name;
+                        
+                        if (ownerName) {
+                            if (!this.avatarOwners[avatarId]) {
+                                this.avatarOwners[avatarId] = [];
+                            }
+                            this.avatarOwners[avatarId].push(ownerName);
+                        }
+                    });
+                    
+                    console.log('✅ 아바타 소유자 정보 로드 완료:', this.avatarOwners);
+                    
+                    // 상점 아이템 다시 렌더링 (소유자 정보 포함)
+                    if (this.avatarItems.length > 0) {
+                        this.renderShopItems();
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ 아바타 소유자 정보 로드 실패:', error);
+                    this.avatarOwners = {};
+                }
+            }
+
+            renderOwnerInfo(avatarId) {
+                const owners = this.avatarOwners[avatarId] || [];
+                
+                // 소유자가 없으면 아무것도 표시하지 않음
+                if (owners.length === 0) {
+                    return '';
+                }
+                
+                // 모든 소유자 표시 (제한 없음)
+                const ownersList = owners.map((name, index) => {
+                    return `${index + 1}. ${name}`;
+                }).join('<br>');
+                
+                return `
+                    <div class="owner-info">
+                        ${ownersList}
+                    </div>
+                `;
+            }
+
+            renderShopItems() {
+                const container = document.getElementById('shop-items');
+                const loading = document.getElementById('shop-loading');
+                
+                console.log('🎨 아바타 렌더링 시작:', {
+                    avatarItems: this.avatarItems.length,
+                    container: !!container,
+                    loading: !!loading
+                });
+                
+                if (!container) {
+                    console.error('❌ shop-items 컨테이너를 찾을 수 없음');
+                    return;
+                }
+                
+                if (this.avatarItems.length === 0) {
+                    loading.innerHTML = `
+                        <div class="empty-state">
+                            <h3>🛒 상품이 없습니다</h3>
+                            <p>아직 판매 중인 아바타가 없습니다.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // 소유한 아이템 ID 목록
+                const ownedItemIds = this.userAvatars.map(ua => ua.avatar_item_id);
+                
+                // URL 해시에서 하이라이트할 아바타 ID 확인
+                const hash = window.location.hash;
+                const highlightAvatarId = hash ? hash.replace('#avatar-', '') : '';
+                
+                console.log('🎨 렌더링 데이터:', {
+                    highlightAvatarId,
+                    ownedItemIds,
+                    avatarItems: this.avatarItems.length
+                });
+                
+                const htmlContent = this.avatarItems.map(item => {
+                    const isOwned = ownedItemIds.includes(item.id);
+                    const canAfford = this.userPoints >= item.price;
+                    const isHighlighted = highlightAvatarId === item.id;
+                    
+                    // 재고 상태 계산
+                    const stockInfo = this.getStockInfo(item);
+                    
+                    console.log(`🎨 아바타 "${item.name}" 렌더링:`, {
+                        id: item.id,
+                        isOwned,
+                        canAfford,
+                        price: item.price,
+                        userPoints: this.userPoints,
+                        stockInfo
+                    });
+                    
+                    return `
+                        <div class="item-card ${isHighlighted ? 'highlighted' : ''}" id="avatar-${item.id}">
+                            ${stockInfo.badge}
+                            <img src="${item.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuaXoOazleWKoOi9veWbvueJhzwvdGV4dD48L3N2Zz4='}" 
+                                 alt="${item.name}" 
+                                 class="item-image"
+                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuaXoOazleWKoOi9veWbvueJhzwvdGV4dD48L3N2Zz4='">
+                            <div class="item-info">
+                                <h3 class="item-name">${item.name}</h3>
+                                <p class="item-description">${item.description || '멋진 아바타입니다.'}</p>
+                                ${this.renderOwnerInfo(item.id)}
+                                <div class="item-price ${item.price === 0 ? 'free' : (item.price > this.userPoints ? 'expensive' : '')}">
+                                    ${item.price === 0 ? '🆓 무료' : `💰 ${item.price}P`}
+                                </div>
+                                ${isOwned ? 
+                                    '<button class="purchase-btn" disabled>✅ 보유중</button>' :
+                                    `<button class="purchase-btn primary ${!canAfford || stockInfo.isSoldOut ? 'disabled' : ''}" 
+                                            ${!canAfford || stockInfo.isSoldOut ? 'disabled' : ''}
+                                            onclick="avatarShop.openPurchaseModal('${item.id}')">
+                                        ${!canAfford ? '포인트 부족' : (stockInfo.isSoldOut ? '품절' : (item.price === 0 ? '무료 받기' : '구매하기'))}
+                                    </button>`
+                                }
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                console.log('🎨 HTML 생성 완료, DOM에 삽입 중...');
+                container.innerHTML = htmlContent;
+                
+                // 강제로 모든 스타일 적용
+                if (loading) {
+                    loading.style.display = 'none';
+                    loading.style.visibility = 'hidden';
+                    loading.style.opacity = '0';
+                }
+                
+                // 컨테이너 강제 표시
+                container.style.display = 'grid';
+                container.style.visibility = 'visible';
+                container.style.opacity = '1';
+                container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+                container.style.gap = '25px';
+                container.style.marginTop = '20px';
+                container.style.minHeight = '400px';
+                
+                // 각 카드 강제 표시
+                const cards = container.querySelectorAll('.item-card');
+                cards.forEach((card, index) => {
+                    card.style.display = 'block';
+                    card.style.visibility = 'visible';
+                    card.style.opacity = '1';
+                    card.style.minHeight = '350px';
+                    card.style.backgroundColor = 'white';
+                    card.style.border = '1px solid #e9ecef';
+                    card.style.borderRadius = '15px';
+                    card.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+                    card.style.padding = '16px';
+                    card.style.margin = '0';
+                    console.log(`✅ 카드 ${index + 1} 강제 표시 완료`);
+                });
+                
+                console.log('✅ 아바타 카드 렌더링 완료:', {
+                    containerVisible: container.style.display,
+                    loadingHidden: loading ? loading.style.display : 'N/A',
+                    childrenCount: container.children.length
+                });
+                
+                // 하이라이트된 아바타로 스크롤
+                if (highlightAvatarId) {
+                    setTimeout(() => {
+                        const highlightedElement = document.getElementById(`avatar-${highlightAvatarId}`);
+                        if (highlightedElement) {
+                            highlightedElement.scrollIntoView({ 
+                                behavior: 'smooth', 
+                                block: 'center' 
+                            });
+                            console.log(`🎯 "${highlightedElement.querySelector('.item-name').textContent}" 아바타로 스크롤 및 하이라이트`);
+                        }
+                    }, 500);
+                }
+            }
+
+            renderInventoryItems() {
+                console.log('🎭 renderInventoryItems 호출됨');
+                console.log('📊 userAvatars 상태:', {
+                    length: this.userAvatars.length,
+                    data: this.userAvatars
+                });
+                
+                const container = document.getElementById('inventory-items');
+                const loading = document.getElementById('inventory-loading');
+                
+                console.log('📦 DOM 요소 확인:', {
+                    container: !!container,
+                    loading: !!loading,
+                    containerDisplay: container?.style.display,
+                    loadingDisplay: loading?.style.display
+                });
+                
+                if (this.userAvatars.length === 0) {
+                    console.log('⚠️ 사용자 아바타가 없음 - 빈 상태 표시');
+                    loading.innerHTML = `
+                        <div class="empty-state">
+                            <h3>👤 아바타가 없습니다</h3>
+                            <p>상점에서 멋진 아바타를 구매해보세요!</p>
+                        </div>
+                    `;
+                    loading.style.display = 'block';
+                    container.style.display = 'none';
+                    return;
+                }
+                
+                console.log('🎨 아바타 카드 HTML 생성 중...');
+                const htmlContent = this.userAvatars.map((userAvatar, index) => {
+                    const item = userAvatar.avatar_items;
+                    const isActive = userAvatar.is_active;
+                    
+                    console.log(`🎯 아바타 ${index + 1} 렌더링:`, {
+                        id: userAvatar.id,
+                        name: item?.name,
+                        isActive,
+                        hasItem: !!item
+                    });
+                    
+                    if (!item) {
+                        console.warn('⚠️ avatar_items 데이터가 없음:', userAvatar);
+                        return '';
+                    }
+                    
+                    return `
+                        <div class="item-card ${isActive ? 'active' : ''}">
+                            <img src="${item.image_url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPuaXoOazleWKoOi9veWbvueJhzwvdGV4dD48L3N2Zz4='}" 
+                                 alt="${item.name}" 
+                                 class="item-image">
+                            <div class="item-info">
+                                <h3 class="item-name">${item.name} ${isActive ? '👑' : ''}</h3>
+                                <p class="item-description">${item.description || '멋진 아바타입니다.'}</p>
+                                <button class="purchase-btn primary" 
+                                        onclick="avatarShop.equipAvatar('${userAvatar.id}')"
+                                        ${isActive ? 'disabled' : ''}>
+                                    ${isActive ? '착용중' : '착용하기'}
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                
+                console.log('📝 생성된 HTML 길이:', htmlContent.length);
+                console.log('📤 HTML을 DOM에 삽입 중...');
+                
+                container.innerHTML = htmlContent;
+                
+                // 강제로 표시 설정
+                container.style.display = 'grid';
+                container.style.visibility = 'visible';
+                container.style.opacity = '1';
+                container.style.height = 'auto';
+                container.classList.remove('hidden');
+                
+                loading.style.display = 'none';
+                loading.style.visibility = 'hidden';
+                
+                // 상위 탭 컨테이너도 확인
+                const inventoryTab = document.getElementById('inventory-tab');
+                if (inventoryTab) {
+                    inventoryTab.style.display = 'block';
+                    inventoryTab.style.visibility = 'visible';
+                    inventoryTab.classList.remove('hidden');
+                }
+                
+                // 강제 리플로우 트리거
+                container.offsetHeight;
+                
+                console.log('✅ 인벤토리 렌더링 완료:', {
+                    cardsGenerated: this.userAvatars.length,
+                    containerVisible: container.style.display,
+                    containerVisibility: container.style.visibility,
+                    containerOpacity: container.style.opacity,
+                    loadingHidden: loading.style.display,
+                    tabVisible: inventoryTab?.style.display,
+                    htmlLength: htmlContent.length
+                });
+            }
+
+            openPurchaseModal(itemId) {
+                const item = this.avatarItems.find(i => i.id === itemId);
+                if (!item) return;
+                
+                this.selectedItemId = itemId;
+                
+                const modal = document.getElementById('purchaseModal');
+                const message = document.getElementById('purchase-message');
+                
+                message.innerHTML = `
+                    <strong>${item.name}</strong>을(를) 구매하시겠습니까?<br>
+                    <span style="color: #007bff; font-weight: 600;">💰 ${item.price === 0 ? '무료' : item.price + 'P'}</span>
+                `;
+                
+                modal.style.display = 'block';
+            }
+
+            closePurchaseModal() {
+                const modal = document.getElementById('purchaseModal');
+                modal.style.display = 'none';
+                this.selectedItemId = null;
+            }
+
+            async confirmPurchase() {
+                if (!this.selectedItemId) return;
+                
+                const item = this.avatarItems.find(i => i.id === this.selectedItemId);
+                if (!item) return;
+                
+                if (this.userPoints < item.price) {
+                    alert('포인트가 부족합니다.');
+                    return;
+                }
+                
+                try {
+                    // 한정판 아이템인 경우 재고 확인
+                    if (item.is_limited && item.remaining_stock <= 0) {
+                        alert('죄송합니다. 해당 아이템이 품절되었습니다.');
+                        return;
+                    }
+                    
+                    // 자동 착용 체크박스 상태 확인
+                    const autoEquipCheckbox = document.getElementById('auto-equip-checkbox');
+                    const shouldAutoEquip = autoEquipCheckbox?.checked || false;
+                    
+                    // 자동 착용을 위해 다른 모든 아바타 비활성화
+                    if (shouldAutoEquip) {
+                        await window.semuApp.supabaseClient
+                            .from('user_avatars')
+                            .update({ is_active: false })
+                            .eq('user_id', this.currentUser.id);
+                    }
+                    
+                    // 구매 처리
+                    const { error: purchaseError } = await window.semuApp.supabaseClient
+                        .from('user_avatars')
+                        .insert({
+                            user_id: this.currentUser.id,
+                            avatar_item_id: item.id,
+                            is_active: shouldAutoEquip  // 체크박스 상태에 따라 바로 착용
+                        });
+                    
+                    if (purchaseError) throw purchaseError;
+                    
+                    // 한정판 아이템인 경우 재고 차감
+                    if (item.is_limited === true && item.remaining_stock !== null && item.remaining_stock > 0) {
+                        const { error: stockError } = await window.semuApp.supabaseClient
+                            .from('avatar_items')
+                            .update({ remaining_stock: item.remaining_stock - 1 })
+                            .eq('id', item.id);
+                        
+                        if (stockError) {
+                            console.warn('⚠️ 재고 차감 실패:', stockError);
+                            // 재고 차감 실패해도 구매는 진행
+                        } else {
+                            console.log('✅ 재고 차감 완료:', item.name, '남은 재고:', item.remaining_stock - 1);
+                        }
+                    }
+                    
+                    // 포인트 차감
+                    const { error: pointsError } = await window.semuApp.supabaseClient
+                        .from('user_points')
+                        .update({ points: this.userPoints - item.price })
+                        .eq('user_id', this.currentUser.id);
+                    
+                    if (pointsError) throw pointsError;
+                    
+                    // 포인트 거래 기록
+                    const { error: transactionError } = await window.semuApp.supabaseClient
+                        .from('point_transactions')
+                        .insert({
+                            user_id: this.currentUser.id,
+                            amount: -item.price,
+                            transaction_type: 'spend',
+                            description: `아바타 구매: ${item.name}`,
+                            avatar_item_id: item.id
+                        });
+                    
+                    if (transactionError) throw transactionError;
+                    
+                    // 구매 완료 메시지 (착용 여부에 따라 다르게 표시)
+                    const successMessage = shouldAutoEquip 
+                        ? '구매가 완료되었고 아바타를 착용했습니다!' 
+                        : '구매가 완료되었습니다!';
+                    alert(successMessage);
+                    this.closePurchaseModal();
+                    
+                    // 데이터 새로고침
+                    await this.loadUserPoints();
+                    await this.loadUserAvatars();
+                    this.renderShopItems();
+                    
+                } catch (error) {
+                    console.error('❌ 구매 실패:', error);
+                    alert('구매 중 오류가 발생했습니다.');
+                }
+            }
+
+            async equipAvatar(userAvatarId) {
+                try {
+                    // 모든 아바타 비활성화
+                    await window.semuApp.supabaseClient
+                        .from('user_avatars')
+                        .update({ is_active: false })
+                        .eq('user_id', this.currentUser.id);
+                    
+                    // 선택한 아바타 활성화
+                    const { error } = await window.semuApp.supabaseClient
+                        .from('user_avatars')
+                        .update({ is_active: true })
+                        .eq('id', userAvatarId);
+                    
+                    if (error) throw error;
+                    
+                    alert('아바타가 변경되었습니다!');
+                    await this.loadUserAvatars();
+                    
+                } catch (error) {
+                    console.error('❌ 아바타 착용 실패:', error);
+                    alert('아바타 착용 중 오류가 발생했습니다.');
+                }
+            }
+
+            showError(message) {
+                const loading = document.getElementById('shop-loading');
+                loading.innerHTML = `
+                    <div class="empty-state">
+                        <h3>❌ 오류 발생</h3>
+                        <p>${message}</p>
+                    </div>
+                `;
+            }
+
+            // 재고 정보 계산 함수
+            getStockInfo(item) {
+                const isLimited = item.is_limited;
+                const totalSupply = item.total_supply;
+                const remainingStock = item.remaining_stock;
+                
+                // 재고 정보가 없는 경우 (기본값)
+                if (isLimited === null || isLimited === undefined || totalSupply === null || totalSupply === undefined) {
+                    return {
+                        badge: '<div class="stock-badge unlimited">♾️ 무제한</div>',
+                        isSoldOut: false,
+                        stockText: '무제한',
+                        stockClass: 'unlimited'
+                    };
+                }
+                
+                if (!isLimited) {
+                    // 무제한 아이템
+                    return {
+                        badge: '<div class="stock-badge unlimited">♾️ 무제한</div>',
+                        isSoldOut: false,
+                        stockText: '무제한',
+                        stockClass: 'unlimited'
+                    };
+                }
+                
+                if (remainingStock <= 0) {
+                    // 품절
+                    return {
+                        badge: '<div class="stock-badge sold-out">❌ 품절</div>',
+                        isSoldOut: true,
+                        stockText: '품절',
+                        stockClass: 'sold-out'
+                    };
+                }
+                
+                const stockPercentage = (remainingStock / totalSupply) * 100;
+                let stockClass, stockText;
+                
+                if (stockPercentage <= 10) {
+                    // 품절임박 (10% 이하)
+                    stockClass = 'critical';
+                    stockText = `품절임박 ${remainingStock}/${totalSupply}`;
+                } else if (stockPercentage <= 30) {
+                    // 재고부족 (30% 이하)
+                    stockClass = 'low';
+                    stockText = `재고부족 ${remainingStock}/${totalSupply}`;
+                } else {
+                    // 재고충분
+                    stockClass = 'sufficient';
+                    stockText = `${remainingStock}/${totalSupply}`;
+                }
+                
+                return {
+                    badge: `<div class="stock-badge ${stockClass}">📦 ${stockText}</div>`,
+                    isSoldOut: false,
+                    stockText: stockText,
+                    stockClass: stockClass
+                };
+            }
+
+            // 강제 표시 함수
+            forceDisplayAvatars() {
+                console.log('🔧 강제 표시 함수 실행 중...');
+                
+                const container = document.getElementById('shop-items');
+                const loading = document.getElementById('shop-loading');
+                
+                if (!container) {
+                    console.error('❌ shop-items 컨테이너를 찾을 수 없음');
+                    return;
+                }
+                
+                // 로딩 완전히 숨기기
+                if (loading) {
+                    loading.style.display = 'none';
+                    loading.style.visibility = 'hidden';
+                    loading.style.opacity = '0';
+                    loading.style.height = '0';
+                    loading.style.overflow = 'hidden';
+                }
+                
+                // 컨테이너 강제 표시
+                container.style.cssText = `
+                    display: grid !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+                    gap: 25px !important;
+                    margin-top: 20px !important;
+                    min-height: 400px !important;
+                    padding: 20px !important;
+                    background: transparent !important;
+                `;
+                
+                // 각 카드 강제 표시
+                const cards = container.querySelectorAll('.item-card');
+                console.log(`🎴 발견된 카드 수: ${cards.length}`);
+                
+                cards.forEach((card, index) => {
+                    card.style.cssText = `
+                        display: block !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+                        min-height: 350px !important;
+                        background: white !important;
+                        border: 1px solid #e9ecef !important;
+                        border-radius: 15px !important;
+                        box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+                        padding: 16px !important;
+                        margin: 0 !important;
+                        position: relative !important;
+                        overflow: hidden !important;
+                        transition: all 0.3s ease !important;
+                    `;
+                    console.log(`✅ 카드 ${index + 1} 강제 표시 완료`);
+                });
+                
+                // 탭 컨텐츠도 확인
+                const tabContent = document.getElementById('shop-tab');
+                if (tabContent) {
+                    tabContent.style.display = 'block';
+                    tabContent.style.visibility = 'visible';
+                    tabContent.style.opacity = '1';
+                    tabContent.classList.remove('hidden');
+                }
+                
+                console.log('🎯 강제 표시 완료!', {
+                    containerDisplay: container.style.display,
+                    containerVisibility: container.style.visibility,
+                    containerOpacity: container.style.opacity,
+                    cardsCount: cards.length,
+                    tabContentDisplay: tabContent ? tabContent.style.display : 'N/A'
+                });
+            }
+        }
+
+        // 전역 함수들
+        function goToDashboard() {
+            window.location.href = 'dashboard.html';
+        }
+
+        function switchTab(tabName) {
+            console.log('🔄 탭 전환:', tabName);
+            
+            // 탭 버튼 업데이트
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 탭 콘텐츠 업데이트
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(tabName + '-tab').classList.remove('hidden');
+            
+            // 인벤토리 탭으로 전환 시 데이터 새로고침
+            if (tabName === 'inventory') {
+                console.log('👤 내 아바타 탭 활성화 - 인벤토리 렌더링 시작');
+                
+                // 탭 표시 강제 설정
+                const inventoryTab = document.getElementById('inventory-tab');
+                if (inventoryTab) {
+                    inventoryTab.style.display = 'block';
+                    inventoryTab.style.visibility = 'visible';
+                    inventoryTab.style.opacity = '1';
+                }
+                
+                // 0.1초 후 렌더링 (DOM 업데이트 완료 후)
+                setTimeout(() => {
+                    if (window.avatarShop && window.avatarShop.userAvatars) {
+                        console.log('🎭 기존 데이터로 인벤토리 렌더링');
+                        window.avatarShop.renderInventoryItems();
+                    } else {
+                        console.log('🔄 아바타 데이터 재로드 중...');
+                        if (window.avatarShop) {
+                            window.avatarShop.loadUserAvatars();
+                        } else {
+                            console.error('❌ avatarShop 인스턴스가 없습니다.');
+                        }
+                    }
+                }, 100);
+            }
+        }
+
+        function confirmPurchase() {
+            avatarShop.confirmPurchase();
+        }
+
+        function closePurchaseModal() {
+            avatarShop.closePurchaseModal();
+        }
+
+        // 전역 강제 표시 함수 (콘솔에서 호출 가능)
+        function forceShowAvatars() {
+            if (window.avatarShop) {
+                window.avatarShop.forceDisplayAvatars();
+            } else {
+                console.error('❌ avatarShop 인스턴스가 없습니다.');
+            }
+        }
+
+        // 모달 외부 클릭시 닫기
+        window.onclick = function(event) {
+            const modal = document.getElementById('purchaseModal');
+            if (event.target === modal) {
+                avatarShop.closePurchaseModal();
+            }
+        }
+
+        // 앱 초기화
+        let avatarShop;
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🎭 아바타 상점 페이지 로드 완료');
+            
+            // 먼저 로그인 상태를 간단히 확인 (localStorage에서)
+            const quickAuthCheck = () => {
+                try {
+                    const supabaseSession = localStorage.getItem('sb-skpvtqohyspfsmvwrgoc-auth-token');
+                    if (!supabaseSession) {
+                        console.log('⚠️ 저장된 인증 토큰이 없음, 로그인 페이지로 이동');
+                        alert('로그인이 필요합니다.');
+                        window.location.href = 'login.html';
+                        return false;
+                    }
+                    return true;
+                } catch (error) {
+                    console.warn('⚠️ 토큰 확인 중 오류:', error);
+                    return true; // 오류 발생시 계속 진행
+                }
+            };
+            
+            if (quickAuthCheck()) {
+                avatarShop = new AvatarShop();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' data: https://fonts.gstatic.com https://cdnjs.cloudflare.com; img-src 'self' data: https:; connect-src 'self' https://skpvtqohyspfsmvwrgoc.supabase.co; frame-src 'none'; object-src 'none'; base-uri 'self';">
+    <title>아바타 관리 - Quizbank 관리자</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #667eea;
+            --primary-dark: #5a6fd8;
+            --secondary-color: #f093fb;
+            --success-color: #4ecdc4;
+            --warning-color: #ffe066;
+            --danger-color: #ff6b6b;
+            --dark-gray: #2c3e50;
+            --light-gray: #ecf0f1;
+            --border-color: #e9ecef;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark-gray);
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .admin-header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .admin-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .admin-header p {
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .admin-content {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .admin-toolbar {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 20px 30px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .toolbar-left {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 10px 40px 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            width: 250px;
+            transition: all 0.3s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+
+        .filter-select {
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .toolbar-right {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #ff5252;
+        }
+
+        .avatar-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .summary-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .summary-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .summary-icon.total { background: var(--primary-color); }
+        .summary-icon.legendary { background: var(--warning-color); color: var(--dark-gray); }
+        .summary-icon.sales { background: var(--success-color); }
+
+        .summary-content h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .summary-content p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .avatars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 30px;
+        }
+
+        .avatar-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+        }
+
+        .avatar-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .avatar-preview {
+            width: 100%;
+            height: 240px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-image {
+            width: 100%;
+            height: 100%;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-color: white;
+            transition: transform 0.3s ease;
+            
+            /* 이미지 비율 유지를 위한 추가 스타일 */
+            background-blend-mode: normal;
+            object-fit: contain;
+        }
+
+        /* 가로가 긴 이미지를 위한 반응형 처리 */
+        .avatar-image.landscape {
+            background-size: contain;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
+        }
+
+        /* 세로가 긴 이미지를 위한 반응형 처리 */
+        .avatar-image.portrait {
+            background-size: contain;
+            width: auto;
+            height: 100%;
+            aspect-ratio: 9/16;
+        }
+
+        /* 정사각형 이미지를 위한 처리 */
+        .avatar-image.square {
+            background-size: contain;
+            aspect-ratio: 1/1;
+        }
+
+        .avatar-card:hover .avatar-image {
+            transform: scale(1.05);
+        }
+
+        /* 재고 표시 스타일 */
+        .stock-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            z-index: 10;
+            backdrop-filter: blur(8px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 3px 12px rgba(0, 0, 0, 0.4);
+            min-width: 60px;
+            text-align: center;
+            line-height: 1.1;
+            pointer-events: none;
+        }
+
+        .stock-low {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.95), rgba(220, 53, 69, 0.8));
+            border-color: rgba(255, 255, 255, 0.3);
+            animation: pulse-danger 2s infinite;
+            box-shadow: 0 2px 12px rgba(220, 53, 69, 0.4);
+        }
+
+        .stock-medium {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.95), rgba(255, 193, 7, 0.8));
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 12px rgba(255, 193, 7, 0.4);
+        }
+
+        .stock-high {
+            background: linear-gradient(135deg, rgba(40, 167, 69, 0.95), rgba(40, 167, 69, 0.8));
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 12px rgba(40, 167, 69, 0.4);
+        }
+
+        .stock-sold-out {
+            background: linear-gradient(135deg, rgba(108, 117, 125, 0.95), rgba(108, 117, 125, 0.8));
+            border-color: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 2px 12px rgba(108, 117, 125, 0.4);
+        }
+
+        .stock-unique {
+            background: linear-gradient(135deg, rgba(138, 43, 226, 0.95), rgba(138, 43, 226, 0.8));
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 2px 15px rgba(138, 43, 226, 0.5);
+            animation: sparkle 3s infinite;
+        }
+
+        @keyframes pulse-danger {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.8; 
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes sparkle {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+                box-shadow: 0 2px 15px rgba(138, 43, 226, 0.5);
+            }
+            50% { 
+                opacity: 0.9; 
+                transform: scale(1.02);
+                box-shadow: 0 4px 20px rgba(138, 43, 226, 0.7);
+            }
+        }
+
+        .avatar-info {
+            padding: 20px;
+        }
+
+        .avatar-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 8px;
+        }
+
+        .avatar-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            line-height: 1.4;
+        }
+
+        .avatar-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .avatar-price {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .avatar-rarity {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .rarity-common { background: #e9ecef; color: #495057; }
+        .rarity-uncommon { background: #d4edda; color: #155724; }
+        .rarity-rare { background: #cce5ff; color: #004085; }
+        .rarity-epic { background: #e2e3ff; color: #6f42c1; }
+        .rarity-legendary { background: #fff3cd; color: #856404; }
+
+        .avatar-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .no-data i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .no-data h4 {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        /* 모달 스타일 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 25px 30px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        }
+
+        .modal-header h5 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6c757d;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: var(--danger-color);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--dark-gray);
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .modal-footer {
+            padding: 20px 30px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background: #f8f9fa;
+        }
+
+        /* 알림 스타일 */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .loading i {
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 한정판 설정 스타일 */
+        .limited-edition-toggle {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+        }
+
+        .toggle-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+            padding: 10px 0;
+            width: 100%;
+        }
+
+        .toggle-label input[type="checkbox"] {
+            display: none;
+        }
+
+        .toggle-slider {
+            width: 52px;
+            height: 26px;
+            background: #ddd;
+            border-radius: 26px;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+            border: 2px solid #e0e0e0;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            top: 1px;
+            left: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .toggle-label input[type="checkbox"]:checked + .toggle-slider {
+            background: #667eea;
+            border-color: #667eea;
+        }
+
+        .toggle-label input[type="checkbox"]:checked + .toggle-slider::before {
+            transform: translateX(26px);
+        }
+
+        .toggle-text {
+            font-weight: 600;
+            color: var(--dark-gray);
+            font-size: 1rem;
+            line-height: 1.4;
+            margin: 0;
+            flex: 1;
+        }
+
+        .form-text.text-muted {
+            color: #6c757d;
+            font-size: 0.875rem;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .limited-settings {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 15px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+                max-height: 0;
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+                max-height: 500px;
+            }
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .limited-info-box {
+            background: linear-gradient(135deg, #e3f2fd, #f3e5f5);
+            border: 1px solid #bbdefb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .info-box-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #1976d2;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-list li {
+            padding: 4px 0 4px 20px;
+            position: relative;
+            color: #666;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .info-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #1976d2;
+            font-weight: bold;
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .toggle-label {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .admin-container {
+                padding: 10px;
+            }
+
+            .admin-toolbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .toolbar-left {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .search-box input {
+                width: 100%;
+                max-width: 300px;
+            }
+
+            .avatars-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+                padding: 20px;
+            }
+
+            .avatar-summary {
+                grid-template-columns: 1fr;
+                gap: 15px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 헤더 -->
+        <div class="admin-header">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+                <a href="./admin.html" class="btn btn-secondary" style="text-decoration: none;">
+                    <i class="fas fa-arrow-left"></i> 관리자 패널로 돌아가기
+                </a>
+                <div style="text-align: right;">
+                    <span style="color: #6c757d; font-size: 0.9rem;">Quizbank 관리자</span>
+                </div>
+            </div>
+            <h1><i class="fas fa-user-circle"></i> 아바타 관리</h1>
+            <p>사용자 아바타 아이템을 관리하고 한정판 카드를 설정하세요</p>
+        </div>
+
+        <!-- 메인 콘텐츠 -->
+        <div class="admin-content">
+            <!-- 툴바 -->
+            <div class="admin-toolbar">
+                <div class="toolbar-left">
+                    <div class="search-box">
+                        <input type="text" id="search-avatars" placeholder="아바타 검색...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <select id="filter-rarity" class="filter-select">
+                        <option value="">모든 등급</option>
+                        <option value="common">일반</option>
+                        <option value="uncommon">고급</option>
+                        <option value="rare">희귀</option>
+                        <option value="epic">영웅</option>
+                        <option value="legendary">전설</option>
+                    </select>
+                    <select id="sort-avatars" class="filter-select">
+                        <option value="created_at">최신순</option>
+                        <option value="name">이름순</option>
+                        <option value="price">가격순</option>
+                        <option value="rarity">등급순</option>
+                    </select>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-primary" onclick="showAddAvatarModal()">
+                        <i class="fas fa-plus"></i> 아바타 추가
+                    </button>
+                    <button class="btn btn-secondary" onclick="refreshAvatars()">
+                        <i class="fas fa-sync-alt"></i> 새로고침
+                    </button>
+                </div>
+            </div>
+
+            <!-- 요약 카드 -->
+            <div class="avatar-summary">
+                <div class="summary-card">
+                    <div class="summary-icon total">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3 id="total-avatars">-</h3>
+                        <p>총 아바타</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon legendary">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3 id="legendary-avatars">-</h3>
+                        <p>전설 등급</p>
+                    </div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon sales">
+                        <i class="fas fa-shopping-cart"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3 id="total-sales">-</h3>
+                        <p>총 판매</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 로딩 표시 -->
+            <div id="avatars-loading" class="loading">
+                <i class="fas fa-spinner"></i>
+                <p>아바타 목록을 불러오는 중...</p>
+            </div>
+
+            <!-- 아바타 그리드 -->
+            <div id="avatars-content" style="display: none;">
+                <div id="avatars-grid" class="avatars-grid">
+                    <!-- 아바타 카드들이 여기에 동적으로 추가됩니다 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 아바타 추가/수정 모달 -->
+    <div id="avatar-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 id="avatar-modal-title">새 아바타 추가</h5>
+                <button class="close" onclick="hideAvatarModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="avatar-form">
+                    <input type="hidden" id="avatar-id">
+                    
+                    <div class="form-group">
+                        <label for="avatar-name">아바타 이름 *</label>
+                        <input type="text" id="avatar-name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="avatar-description">설명</label>
+                        <textarea id="avatar-description" rows="3" placeholder="아바타에 대한 설명을 입력하세요"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="avatar-price">가격 (포인트) *</label>
+                        <input type="number" id="avatar-price" min="0" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="avatar-rarity">등급 *</label>
+                        <select id="avatar-rarity" required>
+                            <option value="common">일반 (Common)</option>
+                            <option value="uncommon">고급 (Uncommon)</option>
+                            <option value="rare">희귀 (Rare)</option>
+                            <option value="epic">영웅 (Epic)</option>
+                            <option value="legendary">전설 (Legendary)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="avatar-image">아바타 이미지 *</label>
+                        <input type="file" id="avatar-image" accept="image/*" required>
+                        <img id="image-preview" style="display: none; max-width: 200px; margin-top: 10px; border-radius: 8px;">
+                    </div>
+
+                    <!-- 한정판 설정 -->
+                    <div class="form-group">
+                        <div class="limited-edition-toggle">
+                            <label class="toggle-label">
+                                <span class="toggle-text">한정판 설정</span>
+                                <input type="checkbox" id="is-limited" onchange="toggleLimitedSettings()">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <small class="form-text text-muted">한정판으로 설정하면 고유 번호를 가진 카드가 생성됩니다</small>
+                        </div>
+                    </div>
+
+                    <!-- 한정판 세부 설정 -->
+                    <div class="limited-settings" id="limited-settings" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="total-supply">총 발행량 *</label>
+                                <input type="number" id="total-supply" min="1" max="10000" placeholder="예: 100">
+                                <small class="form-text">최대 10,000개까지 설정 가능</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="remaining-stock">현재 재고</label>
+                                <input type="number" id="remaining-stock" min="0" placeholder="비워두면 총 발행량과 동일하게 설정">
+                                <small class="form-text">비워두면 총 발행량과 동일하게 설정</small>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="release-date">출시일</label>
+                                <input type="date" id="release-date">
+                                <small class="form-text">비워두면 즉시 출시</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="sale-end-date">판매 종료일</label>
+                                <input type="date" id="sale-end-date">
+                                <small class="form-text">선택사항: 판매 기간 제한</small>
+                            </div>
+                        </div>
+
+                        <div class="limited-info-box">
+                            <div class="info-box-header">
+                                <i class="fas fa-info-circle"></i>
+                                <span>한정판 특징:</span>
+                            </div>
+                            <ul class="info-list">
+                                <li>각 카드는 고유 번호를 가집니다 (예: #001/100)</li>
+                                <li>선착순으로 판매되며, 품절 시 구매 불가</li>
+                                <li>사용자 간 거래 마켓플레이스에서 판매 가능</li>
+                                <li>희귀도가 높을수록 더 높은 가치를 가집니다</li>
+                            </ul>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideAvatarModal()">취소</button>
+                <button type="button" class="btn btn-primary" onclick="saveAvatar()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 삭제 확인 모달 -->
+    <div id="delete-avatar-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5>아바타 삭제</h5>
+                <button class="close" onclick="hideDeleteModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>정말로 이 아바타를 삭제하시겠습니까?</p>
+                <div id="delete-avatar-info"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="hideDeleteModal()">취소</button>
+                <button type="button" class="btn btn-danger" onclick="confirmDeleteAvatar()">삭제</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 스크립트 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./assets/js/common.js"></script>
+    <script src="./js/admin-avatars.js"></script>
+</body>
+</html>

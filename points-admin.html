@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포인트 관리 시스템 - 세무인사이드</title>
+    <link rel="stylesheet" href="./styles/main.css">
+    <link rel="stylesheet" href="./assets/css/common.css">
+    <style>
+        .points-admin-container {
+            padding: 1.5rem;
+            max-width: 1600px;
+            margin: 0 auto;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+            padding: 1.5rem 2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border-left: 6px solid var(--primary-color);
+        }
+
+        .admin-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark-gray);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .admin-title::before {
+            content: "🎯";
+            font-size: 2rem;
+        }
+
+        .admin-nav {
+            display: flex;
+            gap: 0.75rem;
+            background: #f1f5f9;
+            padding: 0.5rem;
+            border-radius: 12px;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.9rem;
+            white-space: nowrap;
+        }
+
+        .nav-btn:hover {
+            background: white;
+            color: var(--primary-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+
+        .nav-btn.active {
+            background: var(--primary-color);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e2e8f0;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), #764ba2);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .stat-number {
+            font-size: 2.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-color), #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+            line-height: 1;
+        }
+
+        .stat-label {
+            color: #64748b;
+            font-size: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            height: fit-content;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.25rem 1.75rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-content {
+            padding: 2rem;
+        }
+
+        .transaction-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .transaction-item-compact {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .transaction-item-compact:hover {
+            background: #f1f5f9;
+        }
+
+        .transaction-item-compact.earn {
+            border-left-color: #10b981;
+        }
+
+        .transaction-item-compact.spend {
+            border-left-color: #ef4444;
+        }
+
+        .transaction-item-compact .user-name {
+            font-weight: 600;
+            color: #374151;
+            min-width: 80px;
+            margin-right: 0.75rem;
+        }
+
+        .transaction-item-compact .description {
+            flex: 1;
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-right: 0.75rem;
+        }
+
+        .transaction-item-compact .date {
+            color: #9ca3af;
+            font-size: 0.85rem;
+            min-width: 80px;
+            margin-right: 0.75rem;
+        }
+
+        .transaction-item-compact .amount {
+            font-weight: 700;
+            font-size: 0.95rem;
+            min-width: 70px;
+            text-align: right;
+        }
+
+        .transaction-item-compact .amount.positive {
+            color: #10b981;
+        }
+
+        .transaction-item-compact .amount.negative {
+            color: #ef4444;
+        }
+
+        .ranking-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .ranking-item-compact {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .ranking-item-compact:hover {
+            background: #f1f5f9;
+        }
+
+        .ranking-item-compact .rank {
+            font-weight: 700;
+            font-size: 1rem;
+            min-width: 35px;
+            margin-right: 0.75rem;
+            text-align: center;
+        }
+
+        .ranking-item-compact .rank.gold {
+            color: #f59e0b;
+        }
+
+        .ranking-item-compact .rank.silver {
+            color: #9ca3af;
+        }
+
+        .ranking-item-compact .rank.bronze {
+            color: #d97706;
+        }
+
+        .ranking-item-compact .rank.other {
+            color: #6b7280;
+        }
+
+        .ranking-item-compact .name {
+            font-weight: 600;
+            color: #374151;
+            min-width: 80px;
+            margin-right: 0.75rem;
+        }
+
+        .ranking-item-compact .dept {
+            flex: 1;
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-right: 0.75rem;
+        }
+
+        .ranking-item-compact .points {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--primary-color);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .tab-content {
+            display: block;
+        }
+
+        .tab-content.hidden {
+            display: none;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 포인트 관리 탭 스타일 */
+        .management-header {
+            margin-bottom: 2rem;
+            padding: 1.5rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .management-header h2 {
+            margin: 0 0 0.5rem 0;
+            color: var(--dark-gray);
+            font-size: 1.8rem;
+        }
+
+        .management-header p {
+            margin: 0;
+            color: var(--medium-gray);
+        }
+
+        .management-section {
+            margin-bottom: 2rem;
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title h3 {
+            margin: 0 0 1.5rem 0;
+            color: var(--dark-gray);
+            font-size: 1.4rem;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 0.5rem;
+        }
+
+        /* 사용자 검색 */
+        .user-search-container {
+            max-width: 800px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .search-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .search-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        .user-search-results {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .user-result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border: 2px solid #f1f5f9;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .user-result-item:hover {
+            border-color: var(--primary-color);
+            background: #f8fafc;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        .user-email {
+            color: var(--medium-gray);
+            font-size: 0.9rem;
+        }
+
+        .user-points {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .user-action-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .give-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .give-btn:hover {
+            background: #059669;
+        }
+
+        .deduct-btn {
+            background: #ef4444;
+            color: white;
+        }
+
+        .deduct-btn:hover {
+            background: #dc2626;
+        }
+
+        /* 일괄 관리 */
+        .batch-management {
+            display: grid;
+            gap: 2rem;
+        }
+
+        .batch-option {
+            border: 2px solid #f1f5f9;
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .batch-option h4 {
+            margin: 0 0 1rem 0;
+            color: var(--dark-gray);
+        }
+
+        .batch-form {
+            display: flex;
+            gap: 1rem;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .points-input, .reason-input, .condition-input {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .points-input {
+            width: 150px;
+        }
+
+        .reason-input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .condition-select, .condition-input {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .condition-select {
+            width: 150px;
+        }
+
+        .condition-input {
+            width: 200px;
+        }
+
+        .batch-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .batch-btn.give {
+            background: #10b981;
+            color: white;
+        }
+
+        .batch-btn.give:hover {
+            background: #059669;
+        }
+
+        .batch-btn.conditional {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .batch-btn.conditional:hover {
+            background: #2563eb;
+        }
+
+        /* 정책 설정 */
+        .policy-settings {
+            display: grid;
+            gap: 1.5rem;
+            max-width: 600px;
+        }
+
+        .policy-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .policy-item label {
+            flex: 1;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        .policy-input {
+            width: 120px;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .policy-unit {
+            color: var(--medium-gray);
+            font-weight: 600;
+        }
+
+        .policy-btn {
+            padding: 1rem 2rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            justify-self: start;
+        }
+
+        .policy-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        /* 거래 내역 탭 스타일 */
+        .history-header {
+            margin-bottom: 2rem;
+            padding: 1.5rem 2rem;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .history-header h2 {
+            margin: 0 0 0.5rem 0;
+            color: var(--dark-gray);
+            font-size: 1.8rem;
+        }
+
+        .history-header p {
+            margin: 0;
+            color: var(--medium-gray);
+        }
+
+        .filter-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 0.5rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: var(--dark-gray);
+            font-size: 0.9rem;
+        }
+
+        .filter-input, .filter-select, .date-input {
+            padding: 0.75rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .filter-input:focus, .filter-select:focus, .date-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .date-inputs {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .date-input {
+            flex: 1;
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .filter-btn.apply {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .filter-btn.apply:hover {
+            background: var(--secondary-color);
+        }
+
+        .filter-btn.reset {
+            background: #6b7280;
+            color: white;
+        }
+
+        .filter-btn.reset:hover {
+            background: #4b5563;
+        }
+
+        .filter-btn.export {
+            background: #10b981;
+            color: white;
+        }
+
+        .filter-btn.export:hover {
+            background: #059669;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .results-info {
+            display: flex;
+            gap: 2rem;
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        .results-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .results-controls label {
+            font-weight: 600;
+            color: var(--dark-gray);
+        }
+
+        .page-size-select {
+            padding: 0.5rem 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .transactions-table-container {
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+
+        .transactions-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .transactions-table th {
+            background: #f8fafc;
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: var(--dark-gray);
+            border-bottom: 2px solid #e2e8f0;
+            white-space: nowrap;
+        }
+
+        .transactions-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+
+        .transactions-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .loading-row {
+            text-align: center;
+            color: var(--medium-gray);
+            padding: 2rem !important;
+        }
+
+        .transaction-amount {
+            font-weight: 600;
+        }
+
+        .transaction-amount.positive {
+            color: #10b981;
+        }
+
+        .transaction-amount.negative {
+            color: #ef4444;
+        }
+
+        .transaction-type {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .transaction-type.earn {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .transaction-type.spend {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .transaction-type.admin {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        .user-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .user-link:hover {
+            text-decoration: underline;
+        }
+
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 0.75rem;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: var(--dark-gray);
+            cursor: pointer;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .pagination-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .pagination-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 1024px) {
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .points-admin-container {
+                padding: 1rem;
+            }
+            
+            .admin-header {
+                flex-direction: column;
+                gap: 1.5rem;
+                align-items: stretch;
+                padding: 1.25rem;
+            }
+            
+            .admin-title {
+                font-size: 1.75rem;
+            }
+            
+            .admin-nav {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            
+            .nav-btn {
+                flex: 1;
+                min-width: 120px;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .stat-card {
+                padding: 1.5rem;
+            }
+            
+            .stat-number {
+                font-size: 2.25rem;
+            }
+            
+            .card-content {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .admin-title {
+                font-size: 1.5rem;
+            }
+            
+            .nav-btn {
+                padding: 0.625rem 1rem;
+                font-size: 0.85rem;
+            }
+            
+            .stat-number {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="points-admin-container">
+        <!-- 헤더 -->
+        <div class="admin-header">
+            <h1 class="admin-title">포인트 관리 시스템</h1>
+            <div class="admin-nav">
+                <button class="nav-btn active" data-tab="overview">📊 대시보드</button>
+                <button class="nav-btn" data-tab="management">⚙️ 포인트 관리</button>
+                <button class="nav-btn" data-tab="history">📋 거래 내역</button>
+                <button class="nav-btn" data-tab="analytics">📈 분석</button>
+                <a href="./admin.html" class="nav-btn">🔙 관리자 메인</a>
+            </div>
+        </div>
+
+        <!-- 대시보드 탭 -->
+        <div id="overviewTab" class="tab-content">
+            <!-- 통계 카드 -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalUsers">-</div>
+                    <div class="stat-label">총 사용자</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPointsIssued">-</div>
+                    <div class="stat-label">총 발급 포인트</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPointsSpent">-</div>
+                    <div class="stat-label">총 사용 포인트</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="activeUsersToday">-</div>
+                    <div class="stat-label">오늘 활동 사용자</div>
+                </div>
+            </div>
+
+            <div class="dashboard-cards">
+                <!-- 최근 거래 내역 -->
+                <div class="dashboard-card">
+                    <div class="card-header">📊 최근 거래 내역</div>
+                    <div class="card-content">
+                        <div id="recentTransactions" class="transaction-list">
+                            로딩 중...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 포인트 랭킹 -->
+                <div class="dashboard-card">
+                    <div class="card-header">🏆 포인트 랭킹 TOP 10</div>
+                    <div class="card-content">
+                        <div id="pointsLeaderboard" class="ranking-list">
+                            로딩 중...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 포인트 관리 탭 -->
+        <div id="managementTab" class="tab-content hidden">
+            <div class="management-header">
+                <h2>⚙️ 포인트 관리</h2>
+                <p>사용자별 포인트 지급, 차감 및 일괄 관리 기능</p>
+            </div>
+
+            <!-- 사용자 검색 및 관리 -->
+            <div class="management-section">
+                <div class="section-title">
+                    <h3>👤 개별 사용자 관리</h3>
+                </div>
+                
+                <div class="user-search-container">
+                    <div class="search-box">
+                        <input type="text" id="userSearchInput" placeholder="사용자 이름 또는 이메일로 검색..." class="search-input">
+                        <button onclick="searchUsers()" class="search-btn">🔍 검색</button>
+                    </div>
+                    
+                    <div id="userSearchResults" class="user-search-results"></div>
+                </div>
+            </div>
+
+            <!-- 일괄 관리 -->
+            <div class="management-section">
+                <div class="section-title">
+                    <h3>⚡ 일괄 포인트 관리</h3>
+                </div>
+                
+                <div class="batch-management">
+                    <div class="batch-option">
+                        <h4>전체 사용자 포인트 지급</h4>
+                        <div class="batch-form">
+                            <input type="number" id="batchPointAmount" placeholder="지급할 포인트" min="1" max="10000" class="points-input">
+                            <input type="text" id="batchPointReason" placeholder="지급 사유" class="reason-input">
+                            <button onclick="batchGivePoints()" class="batch-btn give">💰 전체 지급</button>
+                        </div>
+                    </div>
+                    
+                    <div class="batch-option">
+                        <h4>조건부 포인트 지급</h4>
+                        <div class="batch-form">
+                            <select id="conditionType" class="condition-select">
+                                <option value="department">부서별</option>
+                                <option value="points_range">포인트 범위별</option>
+                                <option value="active_days">활성도별</option>
+                            </select>
+                            <input type="text" id="conditionValue" placeholder="조건 값" class="condition-input">
+                            <input type="number" id="conditionalPoints" placeholder="포인트" class="points-input">
+                            <button onclick="conditionalGivePoints()" class="batch-btn conditional">🎯 조건부 지급</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 포인트 정책 설정 -->
+            <div class="management-section">
+                <div class="section-title">
+                    <h3>📋 포인트 정책 설정</h3>
+                </div>
+                
+                <div class="policy-settings">
+                    <div class="policy-item">
+                        <label>시험 완료 기본 포인트:</label>
+                        <input type="number" id="examBasePoints" value="200" min="0" max="1000" class="policy-input">
+                        <span class="policy-unit">점</span>
+                    </div>
+                    
+                    <div class="policy-item">
+                        <label>정답당 추가 포인트:</label>
+                        <input type="number" id="correctAnswerPoints" value="10" min="0" max="100" class="policy-input">
+                        <span class="policy-unit">점</span>
+                    </div>
+                    
+                    <div class="policy-item">
+                        <label>만점 보너스 포인트:</label>
+                        <input type="number" id="perfectScoreBonus" value="300" min="0" max="500" class="policy-input">
+                        <span class="policy-unit">점</span>
+                    </div>
+                    
+                    <button onclick="updatePointsPolicy()" class="policy-btn">💾 정책 저장</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 거래 내역 탭 -->
+        <div id="historyTab" class="tab-content hidden">
+            <div class="history-header">
+                <h2>📋 거래 내역</h2>
+                <p>모든 포인트 거래 내역을 조회하고 관리할 수 있습니다</p>
+            </div>
+
+            <!-- 필터링 섹션 -->
+            <div class="filter-section">
+                <div class="filter-title">🔍 검색 및 필터</div>
+                
+                <div class="filter-grid">
+                    <div class="filter-group">
+                        <label>사용자 검색:</label>
+                        <input type="text" id="historyUserSearch" placeholder="이름 또는 이메일" class="filter-input">
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>거래 유형:</label>
+                        <select id="historyTransactionType" class="filter-select">
+                            <option value="">전체</option>
+                            <option value="earn">포인트 획득</option>
+                            <option value="spend">포인트 사용</option>
+                            <option value="admin_give">관리자 지급</option>
+                            <option value="admin_deduct">관리자 차감</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group">
+                        <label>기간 설정:</label>
+                        <select id="historyPeriod" class="filter-select">
+                            <option value="all">전체</option>
+                            <option value="today">오늘</option>
+                            <option value="week">최근 1주일</option>
+                            <option value="month">최근 1개월</option>
+                            <option value="custom">직접 설정</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-group custom-date-range hidden" id="customDateRange">
+                        <label>직접 설정:</label>
+                        <div class="date-inputs">
+                            <input type="date" id="startDate" class="date-input">
+                            <span>~</span>
+                            <input type="date" id="endDate" class="date-input">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-actions">
+                    <button onclick="applyHistoryFilters()" class="filter-btn apply">🔍 검색</button>
+                    <button onclick="resetHistoryFilters()" class="filter-btn reset">🔄 초기화</button>
+                    <button onclick="exportTransactions()" class="filter-btn export">📊 CSV 내보내기</button>
+                </div>
+            </div>
+
+            <!-- 결과 표시 섹션 -->
+            <div class="results-section">
+                <div class="results-header">
+                    <div class="results-info">
+                        <span id="resultsCount">검색 결과: 0건</span>
+                        <span id="resultsSum">총 금액: 0P</span>
+                    </div>
+                    
+                    <div class="results-controls">
+                        <label>페이지당 개수:</label>
+                        <select id="pageSize" onchange="applyHistoryFilters()" class="page-size-select">
+                            <option value="20">20개</option>
+                            <option value="50">50개</option>
+                            <option value="100">100개</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="transactions-table-container">
+                    <table class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>시간</th>
+                                <th>사용자</th>
+                                <th>포인트</th>
+                                <th>유형</th>
+                                <th>설명</th>
+                                <th>잔액</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTableBody">
+                            <tr>
+                                <td colspan="6" class="loading-row">데이터를 불러오는 중...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="pagination-container" id="paginationContainer">
+                    <!-- 페이지네이션이 여기에 표시됩니다 -->
+                </div>
+            </div>
+        </div>
+
+        <div id="analyticsTab" class="tab-content hidden">
+            <h2>분석</h2>
+            <p>분석 정보가 여기에 표시됩니다.</p>
+        </div>
+    </div>
+
+    <!-- 스크립트 -->
+    <script src="./js/config.js"></script>
+    <script src="./assets/js/common.js"></script>
+    <script src="./js/auth.js"></script>
+    <script src="./js/points-admin.js"></script>
+    
+    <script>
+        // 포인트 관리 함수들
+        async function searchUsers() {
+            const searchTerm = document.getElementById('userSearchInput').value.trim();
+            const resultsContainer = document.getElementById('userSearchResults');
+            
+            if (!searchTerm) {
+                resultsContainer.innerHTML = '<p style="color: var(--medium-gray); text-align: center;">검색어를 입력해주세요.</p>';
+                return;
+            }
+
+            try {
+                console.log('🔍 사용자 검색:', searchTerm);
+                
+                // 사용자 검색 (이름 또는 이메일)
+                const { data: users, error } = await window.supabaseClient
+                    .from('profiles')
+                    .select(`
+                        id,
+                        name,
+                        email,
+                        user_points (points)
+                    `)
+                    .or(`name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`)
+                    .limit(10);
+
+                if (error) throw error;
+
+                if (users.length === 0) {
+                    resultsContainer.innerHTML = '<p style="color: var(--medium-gray); text-align: center;">검색 결과가 없습니다.</p>';
+                    return;
+                }
+
+                // 각 사용자별 포인트 조회
+                const usersWithPoints = await Promise.all(users.map(async (user) => {
+                    const { data: pointsResult } = await window.supabaseClient.rpc('quizbank_get_points', {
+                        user_uuid: user.id
+                    });
+                    return {
+                        ...user,
+                        points: pointsResult || 0
+                    };
+                }));
+
+                const usersHtml = usersWithPoints.map(user => {
+                    return `
+                        <div class="user-result-item">
+                            <div class="user-info">
+                                <div class="user-name">${user.name || '이름 없음'}</div>
+                                <div class="user-email">${user.email}</div>
+                                <div class="user-points">${user.points.toLocaleString()}P</div>
+                            </div>
+                            <div class="user-actions">
+                                <button class="user-action-btn give-btn" onclick="showPointModal('${user.id}', '${user.name}', 'give')">💰 지급</button>
+                                <button class="user-action-btn deduct-btn" onclick="showPointModal('${user.id}', '${user.name}', 'deduct')">💸 차감</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                resultsContainer.innerHTML = usersHtml;
+
+            } catch (error) {
+                console.error('❌ 사용자 검색 실패:', error);
+                resultsContainer.innerHTML = '<p style="color: #ef4444; text-align: center;">검색 중 오류가 발생했습니다.</p>';
+            }
+        }
+
+        async function showPointModal(userId, userName, action) {
+            const actionText = action === 'give' ? '지급' : '차감';
+            console.log('🔍 showPointModal 시작:', { userId, userName, action });
+            
+            const amount = prompt(`${userName}님에게 포인트 ${actionText}\n\n${actionText}할 포인트를 입력하세요:`);
+            console.log('💰 입력된 amount:', amount, typeof amount);
+            
+            if (!amount || isNaN(amount) || parseInt(amount) <= 0) {
+                console.log('❌ 잘못된 amount:', amount);
+                alert('올바른 포인트를 입력해주세요.');
+                return;
+            }
+
+            const reason = prompt(`포인트 ${actionText} 사유를 입력하세요:`);
+            console.log('📝 입력된 reason:', reason);
+            
+            if (!reason || !reason.trim()) {
+                console.log('❌ 잘못된 reason:', reason);
+                alert('사유를 입력해주세요.');
+                return;
+            }
+
+            const finalAmount = action === 'give' ? parseInt(amount) : -parseInt(amount);
+            console.log('🎯 최종 계산된 amount:', finalAmount);
+            
+            try {
+                console.log(`💰 포인트 ${actionText}:`, { userId, amount: finalAmount, reason });
+                
+                // quizbank_add_points 함수 호출
+                const { data, error } = await window.supabaseClient.rpc('quizbank_add_points', {
+                    description_text: `관리자 ${actionText}: ${reason.trim()}`,
+                    points_to_add: finalAmount,
+                    user_uuid: userId
+                });
+
+                if (error) throw error;
+
+                alert(`✅ ${userName}님에게 ${Math.abs(finalAmount)}P ${actionText} 완료!`);
+                
+                // 검색 결과 새로고침
+                await searchUsers();
+                
+                // 대시보드 데이터 새로고침
+                await loadRealData();
+
+            } catch (error) {
+                console.error(`❌ 포인트 ${actionText} 실패:`, error);
+                alert(`❌ 포인트 ${actionText}에 실패했습니다: ${error.message}`);
+            }
+        }
+
+        async function batchGivePoints() {
+            const amount = parseInt(document.getElementById('batchPointAmount').value);
+            const reason = document.getElementById('batchPointReason').value.trim();
+
+            if (!amount || amount <= 0) {
+                alert('올바른 포인트를 입력해주세요.');
+                return;
+            }
+
+            if (!reason) {
+                alert('지급 사유를 입력해주세요.');
+                return;
+            }
+
+            if (!confirm(`전체 사용자에게 ${amount}P를 지급하시겠습니까?\n사유: ${reason}`)) {
+                return;
+            }
+
+            try {
+                console.log('⚡ 전체 사용자 포인트 지급:', { amount, reason });
+
+                // 모든 사용자 조회
+                const { data: users, error: usersError } = await window.supabaseClient
+                    .from('profiles')
+                    .select('id');
+
+                if (usersError) throw usersError;
+
+                let successCount = 0;
+                let totalCount = users.length;
+
+                // 각 사용자에게 포인트 지급
+                for (const user of users) {
+                    try {
+                        const { error } = await window.supabaseClient.rpc('quizbank_add_points', {
+                            description_text: `전체 지급: ${reason}`,
+                            points_to_add: amount,
+                            user_uuid: user.id
+                        });
+
+                        if (!error) successCount++;
+                    } catch (err) {
+                        console.warn('포인트 지급 실패:', user.id, err);
+                    }
+                }
+
+                alert(`✅ 일괄 지급 완료!\n성공: ${successCount}명 / 전체: ${totalCount}명`);
+                
+                // 입력 필드 초기화
+                document.getElementById('batchPointAmount').value = '';
+                document.getElementById('batchPointReason').value = '';
+                
+                // 대시보드 새로고침
+                await loadRealData();
+
+            } catch (error) {
+                console.error('❌ 일괄 지급 실패:', error);
+                alert('❌ 일괄 지급에 실패했습니다: ' + error.message);
+            }
+        }
+
+        async function conditionalGivePoints() {
+            const conditionType = document.getElementById('conditionType').value;
+            const conditionValue = document.getElementById('conditionValue').value.trim();
+            const points = parseInt(document.getElementById('conditionalPoints').value);
+
+            if (!conditionValue || !points || points <= 0) {
+                alert('모든 필드를 올바르게 입력해주세요.');
+                return;
+            }
+
+            if (!confirm(`조건부 포인트 지급을 실행하시겠습니까?\n조건: ${conditionType} = ${conditionValue}\n포인트: ${points}P`)) {
+                return;
+            }
+
+            try {
+                console.log('🎯 조건부 포인트 지급:', { conditionType, conditionValue, points });
+
+                let query = window.supabaseClient.from('profiles').select('id');
+
+                // 조건별 쿼리 설정
+                switch (conditionType) {
+                    case 'department':
+                        // 부서별 (departments 테이블과 조인 필요시)
+                        alert('부서별 조건은 아직 구현되지 않았습니다.');
+                        return;
+                    
+                    case 'points_range':
+                        // 포인트 범위별 (예: "1000-5000")
+                        const [min, max] = conditionValue.split('-').map(v => parseInt(v.trim()));
+                        if (!min || !max) {
+                            alert('포인트 범위를 "최소-최대" 형식으로 입력해주세요. (예: 1000-5000)');
+                            return;
+                        }
+                        query = query
+                            .select('id, user_points(points)')
+                            .gte('user_points.points', min)
+                            .lte('user_points.points', max);
+                        break;
+                    
+                    case 'active_days':
+                        // 활성도별 (최근 N일 내 로그인)
+                        const days = parseInt(conditionValue);
+                        if (!days) {
+                            alert('활성도 일수를 숫자로 입력해주세요.');
+                            return;
+                        }
+                        const cutoffDate = new Date();
+                        cutoffDate.setDate(cutoffDate.getDate() - days);
+                        query = query.gte('last_login', cutoffDate.toISOString());
+                        break;
+                    
+                    default:
+                        alert('지원하지 않는 조건입니다.');
+                        return;
+                }
+
+                const { data: users, error } = await query;
+                if (error) throw error;
+
+                if (users.length === 0) {
+                    alert('조건에 맞는 사용자가 없습니다.');
+                    return;
+                }
+
+                let successCount = 0;
+                for (const user of users) {
+                    try {
+                        const { error } = await window.supabaseClient.rpc('quizbank_add_points', {
+                            description_text: `조건부 지급 (${conditionType}: ${conditionValue})`,
+                            points_to_add: points,
+                            user_uuid: user.id
+                        });
+
+                        if (!error) successCount++;
+                    } catch (err) {
+                        console.warn('조건부 포인트 지급 실패:', user.id, err);
+                    }
+                }
+
+                alert(`✅ 조건부 지급 완료!\n대상: ${users.length}명, 성공: ${successCount}명`);
+                
+                // 입력 필드 초기화
+                document.getElementById('conditionValue').value = '';
+                document.getElementById('conditionalPoints').value = '';
+                
+                // 대시보드 새로고침
+                await loadRealData();
+
+            } catch (error) {
+                console.error('❌ 조건부 지급 실패:', error);
+                alert('❌ 조건부 지급에 실패했습니다: ' + error.message);
+            }
+        }
+
+        // 포인트 정책 로드 함수
+        function loadPointsPolicy() {
+            try {
+                const savedPolicy = localStorage.getItem('pointsPolicy');
+                if (savedPolicy) {
+                    const policy = JSON.parse(savedPolicy);
+                    
+                    // 저장된 값으로 입력 필드 업데이트
+                    document.getElementById('examBasePoints').value = policy.examBasePoints || 200;
+                    document.getElementById('correctAnswerPoints').value = policy.correctAnswerPoints || 10;
+                    document.getElementById('perfectScoreBonus').value = policy.perfectScoreBonus || 300;
+                    
+                    console.log('📂 저장된 포인트 정책 로드:', policy);
+                } else {
+                    console.log('📂 저장된 포인트 정책 없음, 기본값 사용');
+                }
+            } catch (error) {
+                console.error('❌ 포인트 정책 로드 실패:', error);
+                console.log('📂 기본값 사용');
+            }
+        }
+
+        async function updatePointsPolicy() {
+            const examBasePoints = document.getElementById('examBasePoints').value;
+            const correctAnswerPoints = document.getElementById('correctAnswerPoints').value;
+            const perfectScoreBonus = document.getElementById('perfectScoreBonus').value;
+
+            // 로컬 스토리지에 정책 저장 (실제로는 데이터베이스에 저장해야 함)
+            const policy = {
+                examBasePoints: parseInt(examBasePoints),
+                correctAnswerPoints: parseInt(correctAnswerPoints),
+                perfectScoreBonus: parseInt(perfectScoreBonus),
+                updated: new Date().toISOString()
+            };
+
+            localStorage.setItem('pointsPolicy', JSON.stringify(policy));
+            
+            console.log('💾 포인트 정책 저장:', policy);
+            alert('✅ 포인트 정책이 저장되었습니다!');
+        }
+
+        // 거래 내역 관련 변수
+        let currentPage = 1;
+        let currentFilters = {};
+
+        // 기간 설정 변경 이벤트
+        document.addEventListener('change', function(e) {
+            if (e.target.id === 'historyPeriod') {
+                const customRange = document.getElementById('customDateRange');
+                if (e.target.value === 'custom') {
+                    customRange.classList.remove('hidden');
+                } else {
+                    customRange.classList.add('hidden');
+                }
+            }
+        });
+
+        // 거래 내역 필터 적용
+        async function applyHistoryFilters(page = 1) {
+            const userSearch = document.getElementById('historyUserSearch')?.value.trim() || '';
+            const transactionType = document.getElementById('historyTransactionType')?.value || '';
+            const period = document.getElementById('historyPeriod')?.value || 'all';
+            const pageSize = parseInt(document.getElementById('pageSize')?.value) || 20;
+            
+            let startDate = null;
+            let endDate = null;
+            
+            // 기간 설정
+            const now = new Date();
+            switch (period) {
+                case 'today':
+                    startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
+                    break;
+                case 'week':
+                    startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    endDate = now;
+                    break;
+                case 'month':
+                    startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    endDate = now;
+                    break;
+                case 'custom':
+                    const startInput = document.getElementById('startDate')?.value;
+                    const endInput = document.getElementById('endDate')?.value;
+                    if (startInput) startDate = new Date(startInput);
+                    if (endInput) endDate = new Date(endInput + 'T23:59:59');
+                    break;
+            }
+
+            currentFilters = { userSearch, transactionType, startDate, endDate };
+            currentPage = page;
+
+            try {
+                console.log('🔍 거래 내역 필터 적용:', currentFilters);
+
+                let query = window.supabaseClient
+                    .from('point_transactions')
+                    .select(`
+                        *,
+                        profiles:user_id (
+                            id,
+                            name,
+                            email
+                        )
+                    `, { count: 'exact' });
+
+                // 사용자 검색 필터
+                if (userSearch) {
+                    const { data: matchingUsers } = await window.supabaseClient
+                        .from('profiles')
+                        .select('id')
+                        .or(`name.ilike.%${userSearch}%,email.ilike.%${userSearch}%`);
+                    
+                    if (matchingUsers && matchingUsers.length > 0) {
+                        const userIds = matchingUsers.map(u => u.id);
+                        query = query.in('user_id', userIds);
+                    } else {
+                        // 매칭 사용자 없음
+                        updateTransactionTable([], 0, 0);
+                        return;
+                    }
+                }
+
+                // 거래 유형 필터
+                if (transactionType) {
+                    if (transactionType === 'admin_give' || transactionType === 'admin_deduct') {
+                        query = query.ilike('description', '%관리자%');
+                        if (transactionType === 'admin_give') {
+                            query = query.gt('amount', 0);
+                        } else {
+                            query = query.lt('amount', 0);
+                        }
+                    } else {
+                        query = query.eq('transaction_type', transactionType);
+                    }
+                }
+
+                // 기간 필터
+                if (startDate) {
+                    query = query.gte('created_at', startDate.toISOString());
+                }
+                if (endDate) {
+                    query = query.lte('created_at', endDate.toISOString());
+                }
+
+                // 정렬 및 페이지네이션
+                const offset = (page - 1) * pageSize;
+                query = query
+                    .order('created_at', { ascending: false })
+                    .range(offset, offset + pageSize - 1);
+
+                const { data: transactions, error, count } = await query;
+
+                if (error) throw error;
+
+                updateTransactionTable(transactions || [], count, pageSize);
+
+            } catch (error) {
+                console.error('❌ 거래 내역 조회 실패:', error);
+                document.getElementById('transactionsTableBody').innerHTML = 
+                    '<tr><td colspan="6" class="loading-row" style="color: #ef4444;">거래 내역 조회 중 오류가 발생했습니다.</td></tr>';
+            }
+        }
+
+        // 거래 내역 테이블 업데이트
+        function updateTransactionTable(transactions, totalCount, pageSize) {
+            const tbody = document.getElementById('transactionsTableBody');
+            const resultsCount = document.getElementById('resultsCount');
+            const resultsSum = document.getElementById('resultsSum');
+            
+            if (transactions.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="loading-row">검색 결과가 없습니다.</td></tr>';
+                resultsCount.textContent = '검색 결과: 0건';
+                resultsSum.textContent = '총 금액: 0P';
+                document.getElementById('paginationContainer').innerHTML = '';
+                return;
+            }
+
+            // 총 금액 계산
+            const totalAmount = transactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+            
+            // 테이블 행 생성
+            const tableRows = transactions.map(transaction => {
+                const userName = transaction.profiles?.name || '알 수 없음';
+                const userEmail = transaction.profiles?.email || '';
+                const amount = transaction.amount || 0;
+                const amountClass = amount > 0 ? 'positive' : 'negative';
+                const amountText = amount > 0 ? `+${amount.toLocaleString()}` : `${amount.toLocaleString()}`;
+                
+                // 거래 유형 결정
+                let typeClass = 'earn';
+                let typeText = '획득';
+                
+                if (transaction.description?.includes('관리자')) {
+                    typeClass = 'admin';
+                    typeText = amount > 0 ? '관리자 지급' : '관리자 차감';
+                } else if (amount < 0) {
+                    typeClass = 'spend';
+                    typeText = '사용';
+                } else {
+                    typeClass = 'earn';
+                    typeText = '획득';
+                }
+
+                const createdAt = new Date(transaction.created_at);
+                const timeText = createdAt.toLocaleString('ko-KR');
+
+                return `
+                    <tr>
+                        <td>${timeText}</td>
+                        <td>
+                            <div class="user-name">${userName}</div>
+                            <div style="font-size: 0.85rem; color: var(--medium-gray);">${userEmail}</div>
+                        </td>
+                        <td>
+                            <span class="transaction-amount ${amountClass}">${amountText}P</span>
+                        </td>
+                        <td>
+                            <span class="transaction-type ${typeClass}">${typeText}</span>
+                        </td>
+                        <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis;">${transaction.description || '설명 없음'}</td>
+                        <td>-</td>
+                    </tr>
+                `;
+            }).join('');
+
+            tbody.innerHTML = tableRows;
+            resultsCount.textContent = `검색 결과: ${totalCount}건`;
+            resultsSum.textContent = `총 금액: ${totalAmount.toLocaleString()}P`;
+
+            // 페이지네이션 생성
+            updatePagination(totalCount, pageSize);
+        }
+
+        // 페이지네이션 업데이트
+        function updatePagination(totalCount, pageSize) {
+            const container = document.getElementById('paginationContainer');
+            const totalPages = Math.ceil(totalCount / pageSize);
+            
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let paginationHtml = '';
+            
+            // 이전 버튼
+            if (currentPage > 1) {
+                paginationHtml += `<button class="pagination-btn" onclick="applyHistoryFilters(${currentPage - 1})">‹ 이전</button>`;
+            }
+
+            // 페이지 번호
+            const startPage = Math.max(1, currentPage - 2);
+            const endPage = Math.min(totalPages, currentPage + 2);
+
+            for (let i = startPage; i <= endPage; i++) {
+                const activeClass = i === currentPage ? 'active' : '';
+                paginationHtml += `<button class="pagination-btn ${activeClass}" onclick="applyHistoryFilters(${i})">${i}</button>`;
+            }
+
+            // 다음 버튼
+            if (currentPage < totalPages) {
+                paginationHtml += `<button class="pagination-btn" onclick="applyHistoryFilters(${currentPage + 1})">다음 ›</button>`;
+            }
+
+            container.innerHTML = paginationHtml;
+        }
+
+        // 필터 초기화
+        function resetHistoryFilters() {
+            document.getElementById('historyUserSearch').value = '';
+            document.getElementById('historyTransactionType').value = '';
+            document.getElementById('historyPeriod').value = 'all';
+            document.getElementById('customDateRange').classList.add('hidden');
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            document.getElementById('pageSize').value = '20';
+            
+            currentPage = 1;
+            currentFilters = {};
+            
+            applyHistoryFilters();
+        }
+
+        // CSV 내보내기
+        async function exportTransactions() {
+            try {
+                console.log('📊 거래 내역 CSV 내보내기 시작');
+
+                // 필터 적용된 모든 데이터 조회 (페이지네이션 없이)
+                let query = window.supabaseClient
+                    .from('point_transactions')
+                    .select(`
+                        *,
+                        profiles:user_id (
+                            name,
+                            email
+                        )
+                    `);
+
+                // 현재 필터 적용
+                if (currentFilters.userSearch) {
+                    const { data: matchingUsers } = await window.supabaseClient
+                        .from('profiles')
+                        .select('id')
+                        .or(`name.ilike.%${currentFilters.userSearch}%,email.ilike.%${currentFilters.userSearch}%`);
+                    
+                    if (matchingUsers && matchingUsers.length > 0) {
+                        const userIds = matchingUsers.map(u => u.id);
+                        query = query.in('user_id', userIds);
+                    }
+                }
+
+                if (currentFilters.transactionType) {
+                    query = query.eq('transaction_type', currentFilters.transactionType);
+                }
+
+                if (currentFilters.startDate) {
+                    query = query.gte('created_at', currentFilters.startDate.toISOString());
+                }
+
+                if (currentFilters.endDate) {
+                    query = query.lte('created_at', currentFilters.endDate.toISOString());
+                }
+
+                query = query.order('created_at', { ascending: false });
+
+                const { data: transactions, error } = await query;
+                if (error) throw error;
+
+                // CSV 생성
+                const csvHeader = '시간,사용자명,이메일,포인트,거래유형,설명\n';
+                const csvRows = transactions.map(t => {
+                    const userName = (t.profiles?.name || '알 수 없음').replace(/,/g, ' ');
+                    const userEmail = (t.profiles?.email || '').replace(/,/g, ' ');
+                    const amount = t.amount || 0;
+                    const description = (t.description || '설명 없음').replace(/,/g, ' ');
+                    const type = t.transaction_type || 'unknown';
+                    const time = new Date(t.created_at).toLocaleString('ko-KR');
+                    
+                    return `"${time}","${userName}","${userEmail}",${amount},"${type}","${description}"`;
+                }).join('\n');
+
+                const csvContent = csvHeader + csvRows;
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                
+                link.setAttribute('href', url);
+                link.setAttribute('download', `거래내역_${new Date().toISOString().split('T')[0]}.csv`);
+                link.style.visibility = 'hidden';
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                alert('✅ CSV 파일이 다운로드되었습니다!');
+
+            } catch (error) {
+                console.error('❌ CSV 내보내기 실패:', error);
+                alert('❌ CSV 내보내기에 실패했습니다: ' + error.message);
+            }
+        }
+
+        // 검색 입력 시 엔터키 처리
+        document.addEventListener('keydown', function(e) {
+            if (e.target.id === 'userSearchInput' && e.key === 'Enter') {
+                searchUsers();
+            } else if (e.target.id === 'historyUserSearch' && e.key === 'Enter') {
+                applyHistoryFilters();
+            }
+        });
+
+        // 포인트 관리 시스템 초기화 스크립트
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🎯 포인트 관리 시스템 로드됨');
+            
+            // window.semuApp과 supabaseClient 초기화 대기
+            let attempts = 0;
+            const maxAttempts = 50; // 10초 대기
+            while (attempts < maxAttempts && (!window.semuApp || !window.supabaseClient)) {
+                console.log('⏳ SemuApp & Supabase 초기화 대기 중...', attempts);
+                await new Promise(resolve => setTimeout(resolve, 200));
+                attempts++;
+            }
+            
+            try {
+                if (window.supabaseClient) {
+                    console.log('✅ Supabase 클라이언트 발견, 실제 DB 모드 사용');
+                    await loadRealData();
+                } else {
+                    console.warn('⚠️ Supabase 클라이언트 없음, 목업 모드 사용');
+                    await loadMockData();
+                }
+                
+                // pointsAdmin 객체가 있으면 UI 초기화
+                if (window.pointsAdmin) {
+                    // 개발 모드: 권한 확인 우회
+                    console.log('🔧 개발 모드: 권한 확인 우회');
+                    
+                    // UI 초기화
+                    window.pointsAdmin.setupTabNavigation();
+                }
+
+                // 탭 전환 이벤트 추가
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const tabName = this.dataset.tab;
+                        console.log('🔄 탭 전환:', tabName);
+                        
+                        // 거래 내역 탭이 선택된 경우 데이터 로드
+                        if (tabName === 'history') {
+                            setTimeout(() => {
+                                applyHistoryFilters();
+                            }, 100);
+                        }
+                    });
+                });
+                
+                console.log('🎯 초기화 완료!');
+                
+                // 저장된 포인트 정책 로드
+                loadPointsPolicy();
+                
+            } catch (error) {
+                console.error('❌ 초기화 실패:', error);
+                await loadMockData(); // 실패 시 목업 데이터 로드
+                loadPointsPolicy(); // 목업 모드에서도 포인트 정책 로드
+            }
+        });
+        
+        // 실제 데이터베이스 데이터 로드 함수
+        async function loadRealData() {
+            console.log('🔄 실제 데이터베이스에서 데이터 로딩...');
+            
+            try {
+                // 1. 기본 통계 로드
+                await loadBasicStats();
+                
+                // 2. 최근 거래 내역 로드
+                await loadRecentTransactions();
+                
+                // 3. 포인트 리더보드 로드
+                await loadPointsLeaderboard();
+                
+                console.log('✅ 실제 데이터 로드 완료');
+                
+            } catch (error) {
+                console.error('❌ 실제 데이터 로드 실패:', error);
+                console.log('🔄 목업 데이터로 대체...');
+                await loadMockData();
+            }
+        }
+        
+        // 기본 통계 로드
+        async function loadBasicStats() {
+            // 총 사용자 수
+            const { count: totalUsers } = await window.supabaseClient
+                .from('profiles')
+                .select('*', { count: 'exact', head: true });
+                
+            // 총 발급 포인트 (user_points 테이블에서 직접 합계)
+            const { data: pointsData } = await window.supabaseClient
+                .from('user_points')
+                .select('points');
+            const totalPointsIssued = pointsData?.reduce((sum, u) => sum + u.points, 0) || 0;
+            
+            // 총 사용 포인트 (음수 거래)
+            const { data: spentData } = await window.supabaseClient
+                .from('point_transactions')
+                .select('amount')
+                .lt('amount', 0);
+            const totalPointsSpent = Math.abs(spentData?.reduce((sum, t) => sum + t.amount, 0) || 0);
+            
+            // 오늘 활동한 사용자 (오늘 포인트 거래가 있는 사용자)
+            const today = new Date().toISOString().split('T')[0];
+            const { data: activeToday } = await window.supabaseClient
+                .from('point_transactions')
+                .select('user_id')
+                .gte('created_at', today + 'T00:00:00')
+                .lt('created_at', today + 'T23:59:59');
+            const activeUsersToday = new Set(activeToday?.map(t => t.user_id) || []).size;
+            
+            // UI 업데이트 (안전한 방식으로)
+            const totalUsersEl = document.getElementById('totalUsers');
+            const totalPointsIssuedEl = document.getElementById('totalPointsIssued');
+            const totalPointsSpentEl = document.getElementById('totalPointsSpent');
+            const activeUsersTodayEl = document.getElementById('activeUsersToday');
+            
+            if (totalUsersEl) totalUsersEl.textContent = totalUsers || '0';
+            if (totalPointsIssuedEl) totalPointsIssuedEl.textContent = totalPointsIssued.toLocaleString();
+            if (totalPointsSpentEl) totalPointsSpentEl.textContent = totalPointsSpent.toLocaleString();
+            if (activeUsersTodayEl) activeUsersTodayEl.textContent = activeUsersToday;
+        }
+        
+        // 최근 거래 내역 로드
+        async function loadRecentTransactions() {
+            const { data: transactions, error } = await window.supabaseClient
+                .from('point_transactions')
+                .select(`
+                    *,
+                    profiles:user_id (
+                        name
+                    )
+                `)
+                .order('created_at', { ascending: false })
+                .limit(10);
+                
+            if (error) {
+                console.error('거래 내역 로드 실패:', error);
+                return;
+            }
+            
+            const transactionsHtml = transactions.map(transaction => {
+                const userName = transaction.profiles?.name || '알 수 없음';
+                const amount = transaction.amount; // amount 컬럼 사용
+                const pointsClass = amount > 0 ? 'positive' : 'negative';
+                const pointsSign = amount > 0 ? '+' : '';
+                const date = new Date(transaction.created_at).toLocaleDateString('ko-KR');
+                const description = transaction.description || '포인트 거래';
+                
+                return `
+                    <div class="transaction-item">
+                        <div class="transaction-user">${userName}</div>
+                        <div class="transaction-desc">${description}</div>
+                        <div class="transaction-date">${date}</div>
+                        <div class="transaction-points ${pointsClass}">${pointsSign}${Math.abs(amount)}P</div>
+                    </div>
+                `;
+            }).join('');
+            
+            const transactionsListEl = document.getElementById('recentTransactions');
+            if (transactionsListEl) {
+                transactionsListEl.innerHTML = transactionsHtml;
+            } else {
+                console.warn('⚠️ recentTransactions 엘리먼트를 찾을 수 없음');
+            }
+        }
+        
+        // 포인트 리더보드 로드
+        async function loadPointsLeaderboard() {
+            // user_points 테이블에서 직접 리더보드 조회
+            const { data: rankings, error } = await window.supabaseClient
+                .from('user_points')
+                .select(`
+                    points,
+                    profiles:user_id (
+                        name
+                    )
+                `)
+                .order('points', { ascending: false })
+                .limit(10);
+                
+            if (error) {
+                console.error('리더보드 로드 실패:', error);
+                return;
+            }
+            
+            const rankingsHtml = rankings.map((user, index) => {
+                const rank = index + 1;
+                const medal = rank <= 3 ? ['🥇', '🥈', '🥉'][rank - 1] : `${rank}등`;
+                
+                return `
+                    <div class="ranking-item">
+                        <div class="ranking-position">${medal}</div>
+                        <div class="ranking-user">${user.profiles?.name || '알 수 없음'}</div>
+                        <div class="ranking-points">${user.points.toLocaleString()}P</div>
+                    </div>
+                `;
+            }).join('');
+            
+            const rankingsListEl = document.getElementById('pointsLeaderboard');
+            if (rankingsListEl) {
+                rankingsListEl.innerHTML = rankingsHtml;
+            } else {
+                console.warn('⚠️ pointsLeaderboard 엘리먼트를 찾을 수 없음');
+            }
+        }
+        
+        // 목업 데이터 로드 함수
+        async function loadMockData() {
+            console.log('🔧 목업 데이터 로딩...');
+            
+            // 통계 업데이트
+            document.getElementById('totalUsers').textContent = '12';
+            document.getElementById('totalPointsIssued').textContent = '25,000';
+            document.getElementById('totalPointsSpent').textContent = '8,500';
+            document.getElementById('activeUsersToday').textContent = '5';
+            
+            // 거래 내역 목업
+            const transactionsHtml = `
+                <div class="transaction-item-compact earn">
+                    <span class="user-name">홍길동</span>
+                    <span class="description">시험 완료 보너스</span>
+                    <span class="date">2025. 1. 15.</span>
+                    <span class="amount positive">+100 P</span>
+                </div>
+                <div class="transaction-item-compact spend">
+                    <span class="user-name">김영희</span>
+                    <span class="description">아바타 구매 (멋진 모자)</span>
+                    <span class="date">2025. 1. 15.</span>
+                    <span class="amount negative">-50 P</span>
+                </div>
+                <div class="transaction-item-compact earn">
+                    <span class="user-name">박철수</span>
+                    <span class="description">연속 정답 보너스</span>
+                    <span class="date">2025. 1. 14.</span>
+                    <span class="amount positive">+200 P</span>
+                </div>
+                <div class="transaction-item-compact earn">
+                    <span class="user-name">이영수</span>
+                    <span class="description">시험 합격 보너스</span>
+                    <span class="date">2025. 1. 14.</span>
+                    <span class="amount positive">+150 P</span>
+                </div>
+            `;
+            document.getElementById('recentTransactions').innerHTML = transactionsHtml;
+            
+            // 랭킹 목업
+            const rankingHtml = `
+                <div class="ranking-item-compact">
+                    <span class="rank gold">🥇</span>
+                    <span class="name">홍길동</span>
+                    <span class="dept">개발팀</span>
+                    <span class="points">1,500 P</span>
+                </div>
+                <div class="ranking-item-compact">
+                    <span class="rank silver">🥈</span>
+                    <span class="name">김영희</span>
+                    <span class="dept">기획팀</span>
+                    <span class="points">1,200 P</span>
+                </div>
+                <div class="ranking-item-compact">
+                    <span class="rank bronze">🥉</span>
+                    <span class="name">박철수</span>
+                    <span class="dept">디자인팀</span>
+                    <span class="points">890 P</span>
+                </div>
+                <div class="ranking-item-compact">
+                    <span class="rank other">4.</span>
+                    <span class="name">이영수</span>
+                    <span class="dept">마케팅팀</span>
+                    <span class="points">750 P</span>
+                </div>
+                <div class="ranking-item-compact">
+                    <span class="rank other">5.</span>
+                    <span class="name">최민지</span>
+                    <span class="dept">개발팀</span>
+                    <span class="points">650 P</span>
+                </div>
+            `;
+            document.getElementById('pointsLeaderboard').innerHTML = rankingHtml;
+            
+            console.log('✅ 목업 데이터 로드 완료');
+        }
+        
+        // 탭 네비게이션 설정
+        document.addEventListener('DOMContentLoaded', function() {
+            const navBtns = document.querySelectorAll('.nav-btn[data-tab]');
+            const tabs = document.querySelectorAll('.tab-content');
+            
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+                    
+                    // 모든 버튼에서 active 클래스 제거
+                    navBtns.forEach(b => b.classList.remove('active'));
+                    // 클릭된 버튼에 active 클래스 추가
+                    this.classList.add('active');
+                    
+                    // 모든 탭 숨기기
+                    tabs.forEach(tab => {
+                        if (tab.id === targetTab + 'Tab') {
+                            tab.classList.remove('hidden');
+                        } else {
+                            tab.classList.add('hidden');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
